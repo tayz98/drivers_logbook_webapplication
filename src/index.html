@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flutter Logs</title>
+    <style>
+      pre {
+        white-space: pre-wrap; /* Preserve line breaks */
+        word-wrap: break-word; /* Wrap long lines */
+        background: #f9f9f9;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        max-height: 400px;
+        overflow-y: auto; /* Allow scrolling if content exceeds max height */
+        font-family: monospace; /* Use monospace font for plain text logs */
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flutter Logs</h1>
+    <pre id="log-content">Waiting for log updates...</pre>
+
+    <script>
+      const logContent = document.getElementById("log-content");
+
+      const eventSource = new EventSource("/stream_logs");
+
+      eventSource.onmessage = (event) => {
+        logContent.textContent = event.data;
+      };
+
+      eventSource.onerror = (err) => {
+        logContent.textContent = "Error connecting to log stream.";
+        console.error("SSE error:", err);
+      };
+    </script>
+  </body>
+</html>
