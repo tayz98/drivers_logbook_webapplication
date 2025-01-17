@@ -11,6 +11,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "^4.21.2"
+    "@logdna/tail-file": "^4.0.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "tail-file": "^1.4.16",
+    "winston": "^3.17.0",
+    "ws": "^8.18.0"
   }
 }

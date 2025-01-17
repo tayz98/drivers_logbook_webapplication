@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flutter Logs</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+      }
+      header {
+        background-color: #6200ea;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      #logContainer {
+        padding: 1rem;
+        margin: 1rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-y: auto;
+        max-height: 80vh;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h3>Flutter Logs</h3>
+    </header>
+    <pre id="logContainer"></pre>
+
+    <script>
+      const logContainer = document.getElementById("logContainer");
+      console.log("logContainer:", logContainer);
+
+      const eventSource = new EventSource("/stream_flutter_logs");
+      console.log("EventSource created:", eventSource);
+
+      eventSource.onopen = function () {
+        console.log("Connection to /flutter_logs opened.");
+      };
+
+      eventSource.onmessage = function (event) {
+        let message = event.data;
+        logContainer.innerHTML += message + "\n";
+        logContainer.scrollTop = logContainer.scrollHeight;
+        console.log("Message received:", event.data);
+      };
+
+      eventSource.onerror = function (error) {
+        console.error("EventSource failed:", error);
+      };
+    </script>
+  </body>
+</html>
