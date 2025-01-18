@@ -1,0 +1,18 @@
+GET http://localhost:3000/trips
+
+###
+
+GET http://localhost:3000/trip/15
+
+###
+
+POST http://localhost:3000/trip
+Content-Type: application/json
+
+{
+    "name": "Trip to the moon",
+    "description": "A trip to the moon",
+    "price": 1000,
+    "date": "2021-12-12",
+    "duration": 5
+}
