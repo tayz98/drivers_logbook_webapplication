@@ -40,6 +40,7 @@ const tripSchema = new mongoose.Schema({
   tripNotes: {
     type: String,
     required: false,
+    default: "",
   },
   tripStatus: {
     type: String,
@@ -68,6 +69,18 @@ const tripSchema = new mongoose.Schema({
         return vehicle !== null;
       },
       message: "Vehicle does not exist",
+    },
+  },
+  replacedByTripId: {
+    type: String,
+    ref: "Trip",
+    required: false,
+    validate: {
+      validator: async (replacedByTripId) => {
+        const trip = await Trip.exists({ _id: replacedByTripId });
+        return trip !== null;
+      },
+      message: "Trip does not exist",
     },
   },
 });

@@ -12,6 +12,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "joi": "^17.13.3",
     "mongoose": "^8.9.5",
     "winston": "^3.17.0"
   },
