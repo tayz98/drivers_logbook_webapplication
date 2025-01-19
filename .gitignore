@@ -1,7 +1,9 @@
 /node_modules
-/src/logs/
-/src/middleware/logs/*
-/src/middleware/logs/
+src/logs/
+src/middleware/logs/*
+src/middleware/logs
 .env
 /src/routes/routes.rest
 *.rest
+src/routes/routes.rest
+*.log
