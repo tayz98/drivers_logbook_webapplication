@@ -4,6 +4,20 @@ const Driver = require("./driver");
 const locationSchema = require("./location");
 
 const tripSchema = new mongoose.Schema({
+  _id: {
+    type: Number,
+    required: false,
+  },
+  recorded: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  checked: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   startLocation: {
     type: locationSchema,
     required: true,
@@ -13,11 +27,11 @@ const tripSchema = new mongoose.Schema({
     required: false,
   },
   startTimestamp: {
-    type: Date,
+    type: String,
     required: true,
   },
-  startTimestamp: {
-    type: Date,
+  endTimestamp: {
+    type: String,
     required: true,
   },
   startMileage: {
@@ -38,6 +52,11 @@ const tripSchema = new mongoose.Schema({
     required: false,
   },
   tripNotes: {
+    type: [String],
+    required: false,
+    default: [],
+  },
+  detourNote: {
     type: String,
     required: false,
     default: "",
@@ -72,7 +91,7 @@ const tripSchema = new mongoose.Schema({
     },
   },
   replacedByTripId: {
-    type: String,
+    type: Number,
     ref: "Trip",
     required: false,
     validate: {
@@ -83,6 +102,18 @@ const tripSchema = new mongoose.Schema({
       message: "Trip does not exist",
     },
   },
+  receivedDate: {
+    type: Date,
+    required: false,
+    default: Date.now,
+  },
+  isInvalid: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
+
+tripSchema.plugin(AutoIncrement, { id: "trip_seq", inc_field: "_id" });
 
 module.exports = mongoose.model("Trip", tripSchema);

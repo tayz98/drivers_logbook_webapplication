@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Driver = require("./driver");
 
+// TODO: add encryption for password
+
 const webUserSchema = new mongoose.Schema({
   username: {
     type: String,
