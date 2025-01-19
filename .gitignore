@@ -4,3 +4,4 @@
 /src/middleware/logs/
 .env
 /src/routes/routes.rest
+*.rest
