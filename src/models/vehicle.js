@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Driver = require("./driver");
 
 const vehicleSchema = new mongoose.Schema({
   _id: {

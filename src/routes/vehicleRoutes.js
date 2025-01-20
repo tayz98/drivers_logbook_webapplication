@@ -32,7 +32,6 @@ router.post("/vehicle", async (req, res) => {
     model: req.body.model,
     year: req.body.year,
     licensePlate: req.body.licensePlate,
-    driverId: req.body.driverId,
   });
   try {
     const newVehicle = await vehicle.save();

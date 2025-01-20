@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Vehicle = require("./vehicle");
-const Driver = require("./driver");
 const locationSchema = require("./location");
 
 const tripSchema = new mongoose.Schema({

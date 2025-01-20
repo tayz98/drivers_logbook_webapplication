@@ -40,7 +40,6 @@ router.post("/trip", authenticateAnyApiKey, async (req, res) => {
     tripPurpose: req.body.tripPurpose,
     tripNotes: req.body.tripNotes,
     tripStatus: req.body.tripStatus,
-    driverId: req.body.driverId,
     vehicleId: req.body.vin,
     recorded: req.body.recorded,
   });

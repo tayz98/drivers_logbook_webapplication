@@ -2,7 +2,6 @@ const express = require("express");
 const staticRoutes = require("./staticRoutes");
 const logRoutes = require("./logRoutes");
 const tripRoutes = require("./tripRoutes");
-const driverRoutes = require("./driverRoutes");
 const vehicleRoutes = require("./vehicleRoutes");
 const router = express.Router();
 
