@@ -7,6 +7,10 @@ const vehicleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  customName: {
+    type: String,
+    required: false,
+  },
   brand: {
     type: String,
     required: false,
@@ -22,18 +26,6 @@ const vehicleSchema = new mongoose.Schema({
   licensePlate: {
     type: String,
     required: false,
-  },
-  driverId: {
-    type: String,
-    ref: "Driver",
-    validate: {
-      validator: async (driverId) => {
-        const driver = await Driver.exists({ _id: driverId });
-        return driver !== null;
-      },
-      message: "Driver does not exist",
-    },
-    required: false, // only some people own a vehicle, others are shared
   },
 });
 

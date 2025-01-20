@@ -20,6 +20,12 @@ router.get("/vehicle/:id", getVehicle, async (req, res) => {
 
 // creating a vehicle
 router.post("/vehicle", async (req, res) => {
+  if (req.body.vin != null) {
+    const findVehicle = await Vehicle.exists({ _id: req.body.vin });
+    if (findVehicle) {
+      return res.status(400).json({ message: "Vehicle already exists" });
+    }
+  }
   const vehicle = new Vehicle({
     _id: req.body.vin,
     brand: req.body.brand,
@@ -41,6 +47,9 @@ router.patch("/vehicle/:id", getVehicle, async (req, res) => {
   if (req.body.brand != null) {
     res.vehicle.brand = req.body.brand;
   }
+  if (req.body.customName != null) {
+    res.vehicle.customName = req.body.customName;
+  }
   if (req.body.model != null) {
     res.vehicle.model = req.body.model;
   }
@@ -49,9 +58,6 @@ router.patch("/vehicle/:id", getVehicle, async (req, res) => {
   }
   if (req.body.licensePlate != null) {
     res.vehicle.licensePlate = req.body.licensePlate;
-  }
-  if (req.body.driverId != null) {
-    res.vehicle.driverId = req.body.driverId;
   }
   try {
     const updatedVehicle = await res.vehicle.save();

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Driver = require("./driver");
+const Vehicle = require("./vehicle");
 
 // TODO: add encryption for password
 
@@ -18,24 +18,23 @@ const webUserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["driver", "admin", "dispatcher", "manager"],
-    // driver - basic role: can permit private trips to be viewed by dispatcher
+    enum: ["manager", "admin", "dispatcher"],
+    // manager - can see and manage all his trips with a specific vehicle_id
     // admin - full access to all data
-    // dispatcher - can view all business trips and manage vehicles
-    // manager - a more privileged driver role
+    // dispatcher - can view and manage all business trips and manage vehicles
     required: true,
   },
-  driverId: {
+  vehicleId: {
     type: String,
-    ref: "Driver",
-    validate: {
-      validator: async (driverId) => {
-        const driver = await Driver.exists({ _id: driverId });
-        return driver !== null;
-      },
-      message: "Driver does not exist",
-    },
+    ref: "Vehicle",
     required: false,
+    validate: {
+      validator: async function (v) {
+        const vehicle = await Vehicle.exists({ _id: v });
+        return vehicle !== null;
+      },
+      message: "Vehicle does not exist",
+    },
   },
 });
 

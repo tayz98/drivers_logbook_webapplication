@@ -66,18 +66,6 @@ const tripSchema = new mongoose.Schema({
     enum: ["finished", "cancelled"],
     required: true,
   },
-  driverId: {
-    type: String,
-    ref: "Driver",
-    validate: {
-      validator: async (driverId) => {
-        const driver = await Driver.exists({ _id: driverId });
-        return driver !== null;
-      },
-      message: "Driver does not exist",
-    },
-    required: true,
-  },
   vehicleId: {
     type: String,
     ref: "Vehicle",

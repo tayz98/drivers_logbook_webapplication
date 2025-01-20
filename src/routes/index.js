@@ -9,7 +9,6 @@ const router = express.Router();
 router.use("/", staticRoutes);
 router.use("/", logRoutes);
 router.use("/", tripRoutes);
-router.use("/", driverRoutes);
 router.use("/", vehicleRoutes);
 
 module.exports = router;
