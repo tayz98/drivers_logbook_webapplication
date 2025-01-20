@@ -3,9 +3,15 @@ const router = express.Router();
 const Trip = require("../models/trip");
 const { mergeTrips } = require("../services/tripService");
 const formatDate = require("../utils/formatDate");
+const {
+  authenticateAdminApiKey,
+  authenticateDriverApiKey,
+  authenticateAnyApiKey,
+  authorize,
+} = require("../services/authenticationService");
 
 // getting all trips
-router.get("/trips", async (req, res) => {
+router.get("/trips", authenticateAdminApiKey, async (req, res) => {
   try {
     const trips = await Trip.find();
     res.json(trips);
@@ -15,12 +21,12 @@ router.get("/trips", async (req, res) => {
 });
 
 // getting one trip by id
-router.get("/trip/:id", getTrip, async (req, res) => {
+router.get("/trip/:id", getTrip, authenticateAdminApiKey, async (req, res) => {
   res.json(res.trip);
 });
 
 // creating a trip
-router.post("/trip", async (req, res) => {
+router.post("/trip", authenticateAnyApiKey, async (req, res) => {
   const timestamp = formatDate(new Date());
   console.log(req.body);
   const trip = new Trip({
@@ -54,7 +60,7 @@ router.post("/trip", async (req, res) => {
 });
 
 // updating one trip by id
-router.patch("/trip/:id", getTrip, async (req, res) => {
+router.patch("/trip/:id", getTrip, authorize, async (req, res) => {
   if (!isTripEditableWithinSevenDays(res.trip)) {
     return res.status(403).json({
       message: "You are not allowed to edit trips older than 7 days!",
@@ -208,7 +214,7 @@ router.patch("/trip/:id", getTrip, async (req, res) => {
 });
 
 // deleting one trip by id
-router.delete("/trip/:id", getTrip, async (req, res) => {
+router.delete("/trip/:id", getTrip, authorize, async (req, res) => {
   try {
     await res.trip.deleteOne();
     res.json({ message: "Trip deleted" });
@@ -224,7 +230,7 @@ router.delete("/trip/:id", getTrip, async (req, res) => {
 // show only trips that are not older than 7 days
 // make it possible to filter by checked/unchecked
 // don't show invalid trips anymore
-router.get("/trips/:webUserId", getWebUser, async (req, res) => {
+router.get("/trips/:webUserId", getWebUser, authorize, async (req, res) => {
   try {
     const webUser = res.webUser;
     let trips;
@@ -237,9 +243,9 @@ router.get("/trips/:webUserId", getWebUser, async (req, res) => {
           $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
         },
       });
-    } else if (webUser.role === "driver" || webUser.role === "manager") {
+    } else if (webUser.role === "manager") {
       trips = await Trip.find({
-        driverId: webUser.driverId,
+        vehicleId: webUser.vehicleId,
         checked: req.query.checked,
         isInvalid: false,
         startTimestamp: {
@@ -247,13 +253,7 @@ router.get("/trips/:webUserId", getWebUser, async (req, res) => {
         },
       });
     } else if (webUser.role === "admin") {
-      trips = await Trip.find({
-        checked: req.query.checked,
-        isInvalid: false,
-        startTimestamp: {
-          $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
-        },
-      });
+      trips = await Trip.find({});
     }
     res.json(trips);
   } catch (error) {
@@ -276,7 +276,7 @@ async function getTrip(req, res, next) {
   next();
 }
 // middleware
-async function getTrips(req, res, next) {
+async function getAllTrips(req, res, next) {
   try {
     const tripIds = req.body.tripIds;
 
@@ -313,7 +313,7 @@ async function getWebUser(req, res, next) {
   next();
 }
 
-router.post("/merge-trips", getTrips, async (req, res) => {
+router.post("/merge-trips", getAllTrips, authorize, async (req, res) => {
   try {
     const trips = res.trips;
     if (trips.some((trip) => isInvalid)) {

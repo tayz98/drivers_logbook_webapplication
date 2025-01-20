@@ -1,9 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/webUser");
+const {
+  authorize,
+  authToken,
+  restrictToOwnData,
+  authenticateAdminApiKey,
+  authenticateAdminApiKey,
+} = require("../services/authenticationService");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const { authenticateAdminApiKey } = require("../services/apiKeyService");
+require("dotenv").config();
 
 // getting all users
-router.get("/users", async (req, res) => {
+router.get("/users", authenticateAdminApiKey, async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -13,12 +24,12 @@ router.get("/users", async (req, res) => {
 });
 
 // getting one user by id
-router.get("/user/:id", getUser, async (req, res) => {
+router.get("/user/:id", authenticateAdminApiKey, getUser, async (req, res) => {
   res.json(res.user);
 });
 
 // creating a user
-router.post("/user", async (req, res) => {
+router.post("/user", authenticateAdminApiKey, async (req, res) => {
   const user = new User({
     username: req.body.username,
     password: req.body.password,
@@ -34,31 +45,63 @@ router.post("/user", async (req, res) => {
   }
 });
 
-// updating one user by id
-
-router.patch("/user/:id", getUser, async (req, res) => {
-  if (req.body.username != null) {
-    res.user.username = req.body.username;
-  }
-  if (req.body.password != null) {
-    res.user.password = req.body.password;
-  }
-  if (req.body.email != null) {
-    res.user.email = req.body.email;
-  }
-  if (req.body.role != null) {
-    res.user.role = req.body.role;
-  }
-  if (req.body.vehicleId != null) {
-    res.user.vehicleId = req.body.vehicleId;
-  }
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
   try {
-    const updatedUser = await res.user.save();
-    res.json(updatedUser);
+    if (!username || !password) {
+      return res.status(400).json({ message: "Missing username or password" });
+    }
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    // Compare password with the hashed version in the database
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+    const accessToken = jwt.sign(
+      { userId: user._id, username: user.username },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "12h" }
+    );
+    res.json({ accessToken: accessToken });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 });
+
+// updating one user by id
+router.patch(
+  "/user/:id",
+  getUser,
+  authorize,
+  restrictToOwnData,
+  async (req, res) => {
+    if (req.body.username != null) {
+      res.user.username = req.body.username;
+    }
+    if (req.body.password != null) {
+      res.user.password = req.body.password;
+    }
+    if (req.body.email != null) {
+      res.user.email = req.body.email;
+    }
+    if (req.body.role != null) {
+      res.user.role = req.body.role;
+    }
+    if (req.body.vehicleId != null) {
+      res.user.vehicleId = req.body.vehicleId;
+    }
+    try {
+      const updatedUser = await res.user.save();
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+);
 
 // middleware
 async function getUser(req, res, next) {

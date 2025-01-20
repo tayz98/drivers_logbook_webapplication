@@ -1,16 +1,51 @@
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = process.env.JWT_SECRET || "yourSecretKeyHere";
 
-// TODO: implement HTTPS later
+const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET;
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+const DRIVER_API_KEY = process.env.DRIVER_API_KEY;
+require("dotenv").config();
 
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
+function authenticateAdminApiKey(req, res, next) {
+  const apiKey = req.headers["x-api-key"]; // Custom header for API key
+  if (!apiKey) {
+    return res.status(401).json({ message: "API key is missing" });
+  }
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ message: "Invalid API key" });
+  }
+  next(); // API key is valid, proceed to the next middleware or route
+}
+
+function authenticateDriverApiKey(req, res, next) {
+  const apiKey = req.headers["x-api-key"]; // Custom header for API key
+  if (!apiKey) {
+    return res.status(401).json({ message: "API key is missing" });
+  }
+  if (apiKey !== API_KEY) {
+    return res.status(403).json({ message: "Invalid API key" });
+  }
+  next(); // API key is valid, proceed to the next middleware or route
+}
+
+function authenticateAnyApiKey(req, res, next) {
+  const apiKey = req.headers["x-api-key"]; // Custom header for API key
+  if (!apiKey) {
+    return res.status(401).json({ message: "API key is missing" });
+  }
+  if (apiKey !== ADMIN_API_KEY && apiKey !== DRIVER_API_KEY) {
+    return res.status(403).json({ message: "Invalid API key" });
+  }
+  next(); // API key is valid, proceed to the next middleware or route
+}
+
+function authToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
   if (!authHeader) {
     return res.status(401).json({ message: "No token provided." });
   }
 
   const token = authHeader.split(" ")[1]; // "Bearer <token>"
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: "Token invalid or expired." });
     }
@@ -19,23 +54,48 @@ function authMiddleware(req, res, next) {
   });
 }
 
-function roleCheck(requiredRoles = []) {
-  return (req, res, next) => {
-    // Make sure user is authenticated first
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated." });
-    }
-    // Check if user's role is in the list of allowed roles
-    if (!requiredRoles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ message: "Forbidden: insufficient permissions." });
-    }
-    next();
-  };
+async function authorize(req, res, next) {
+  const apiKey = req.headers["x-api-key"]; // Admin API key
+  const authHeader = req.headers["authorization"]; // Bearer Token
+
+  if (apiKey && apiKey === API_KEY) {
+    // Admin API key is valid
+    req.isAdmin = true;
+    return next();
+  } else if (authHeader) {
+    const token = authHeader.split(" ")[1]; // Extract token
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: "Invalid or expired token." });
+      }
+      req.isAdmin = false;
+      req.user = decoded;
+      return next();
+    });
+  } else {
+    return res.status(401).json({ message: "Unauthorized access." });
+  }
+}
+
+function restrictToOwnData(req, res, next) {
+  if (req.isAdmin) {
+    // Admin can update any user
+    return next();
+  }
+  if (req.user && req.user.userId === req.params.id) {
+    // User can update only their own data
+    return next();
+  }
+  return res
+    .status(403)
+    .json({ message: "You are not authorized to update this user." });
 }
 
 module.exports = {
-  authMiddleware,
-  roleCheck,
+  authToken,
+  authenticateAdminApiKey,
+  authenticateDriverApiKey,
+  authorize,
+  restrictToOwnData,
+  authenticateAnyApiKey,
 };
