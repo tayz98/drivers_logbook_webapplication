@@ -90,3 +90,5 @@ async function getVehicle(req, res, next) {
   res.vehicle = vehicle;
   next();
 }
+
+module.exports = router;

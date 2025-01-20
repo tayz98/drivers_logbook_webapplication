@@ -1,5 +1,5 @@
 const Trip = require("../models/trip");
-const formatDate = require("../utils/formatDate");
+const formatDate = require("../utility");
 
 async function mergeTrips(trips) {
   if (trips.length !== 2) {

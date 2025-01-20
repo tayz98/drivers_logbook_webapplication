@@ -1,16 +1,19 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 const DRIVER_API_KEY = process.env.DRIVER_API_KEY;
-require("dotenv").config();
 const { db } = require("../mongodb");
+const mongoose = require("mongoose");
 
 function authenticateAdminApiKey(req, res, next) {
   const apiKey = req.headers["x-api-key"]; // Custom header for API key
   if (!apiKey) {
     return res.status(401).json({ message: "API key is missing" });
   }
+  console.log(apiKey);
+  console.log(ADMIN_API_KEY);
   if (apiKey !== ADMIN_API_KEY) {
     return res.status(403).json({ message: "Invalid API key" });
   }

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Trip = require("../models/trip");
 const { mergeTrips } = require("../services/tripService");
-const formatDate = require("../utils/formatDate");
+const formatDate = require("../utility");
 const {
   authenticateAdminApiKey,
   authenticateDriverApiKey,
