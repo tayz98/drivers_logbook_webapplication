@@ -7,10 +7,12 @@ const {
   restrictToOwnData,
   authenticateAdminApiKey,
   authenticateAdminApiKey,
+  RefreshToken,
 } = require("../services/authenticationService");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { authenticateAdminApiKey } = require("../services/apiKeyService");
+const { create } = require("../models/vehicle");
 require("dotenv").config();
 
 // getting all users
@@ -64,12 +66,53 @@ router.post("/login", async (req, res) => {
     const accessToken = jwt.sign(
       { userId: user._id, username: user.username },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "12h" }
+      { expiresIn: "1h" }
     );
+    const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
+    const newRefreshToken = new RefreshToken({
+      token: refreshToken,
+      userId: user._id,
+    });
+
+    await newRefreshToken.save();
+
     res.json({ accessToken: accessToken });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+app.post("/token", async (req, res) => {
+  const refreshToken = req.body.token;
+  if (!refreshToken)
+    return res.status(401).json({ message: "Refresh token is missing." });
+
+  // Check if token exists in the database
+  const storedToken = await RefreshToken.findOne({ token: refreshToken });
+  if (!storedToken)
+    return res.status(403).json({ message: "Invalid refresh token." });
+
+  // Verify the token
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+    if (err)
+      return res.status(403).json({ message: "Token expired or invalid." });
+
+    const accessToken = generateAccessToken({
+      userId: user._id,
+      username: user.username,
+    });
+    res.json({ accessToken });
+  });
+});
+
+app.delete("/logout", async (req, res) => {
+  const refreshToken = req.body.token;
+  if (!refreshToken) return res.sendStatus(401);
+
+  // Delete token from the database
+  await RefreshToken.deleteOne({ token: refreshToken });
+
+  res.sendStatus(204);
 });
 
 // updating one user by id
@@ -99,6 +142,20 @@ router.patch(
       res.json(updatedUser);
     } catch (error) {
       res.status(400).json({ message: error.message });
+    }
+  }
+);
+
+router.delete(
+  "/user/:id",
+  getUser,
+  authenticateAdminApiKey,
+  async (req, res) => {
+    try {
+      await res.user.deleteOne();
+      res.json({ message: "Deleted user" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   }
 );

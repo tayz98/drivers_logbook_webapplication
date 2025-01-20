@@ -4,13 +4,14 @@ const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 const DRIVER_API_KEY = process.env.DRIVER_API_KEY;
 require("dotenv").config();
+const { db } = require("../mongodb");
 
 function authenticateAdminApiKey(req, res, next) {
   const apiKey = req.headers["x-api-key"]; // Custom header for API key
   if (!apiKey) {
     return res.status(401).json({ message: "API key is missing" });
   }
-  if (apiKey !== API_KEY) {
+  if (apiKey !== ADMIN_API_KEY) {
     return res.status(403).json({ message: "Invalid API key" });
   }
   next(); // API key is valid, proceed to the next middleware or route
@@ -21,7 +22,7 @@ function authenticateDriverApiKey(req, res, next) {
   if (!apiKey) {
     return res.status(401).json({ message: "API key is missing" });
   }
-  if (apiKey !== API_KEY) {
+  if (apiKey !== DRIVER_API_KEY) {
     return res.status(403).json({ message: "Invalid API key" });
   }
   next(); // API key is valid, proceed to the next middleware or route
@@ -91,6 +92,14 @@ function restrictToOwnData(req, res, next) {
     .json({ message: "You are not authorized to update this user." });
 }
 
+const refreshTokenSchema = new mongoose.Schema({
+  token: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  createdAt: { type: Date, default: Date.now, expires: "150d" },
+});
+
+const RefreshToken = db.model("RefreshToken", refreshTokenSchema);
+
 module.exports = {
   authToken,
   authenticateAdminApiKey,
@@ -98,4 +107,5 @@ module.exports = {
   authorize,
   restrictToOwnData,
   authenticateAnyApiKey,
+  RefreshToken,
 };
