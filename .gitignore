@@ -7,3 +7,4 @@ src/middleware/logs
 *.rest
 src/routes/routes.rest
 *.log
+*/logs

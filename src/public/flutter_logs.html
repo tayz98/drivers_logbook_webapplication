@@ -36,27 +36,90 @@
     <header>
       <h3>Flutter Logs</h3>
     </header>
-    <pre id="logContainer"></pre>
+    <div id="logContainer"></div>
 
     <script>
       const logContainer = document.getElementById("logContainer");
-      console.log("logContainer:", logContainer);
-
       const eventSource = new EventSource("/stream_flutter_logs");
-      console.log("EventSource created:", eventSource);
 
-      eventSource.onopen = function () {
+      let tempBuffer = [];
+
+      eventSource.onopen = () => {
         console.log("Connection to /flutter_logs opened.");
       };
 
-      eventSource.onmessage = function (event) {
-        let message = event.data;
-        logContainer.innerHTML += message + "\n";
-        logContainer.scrollTop = logContainer.scrollHeight;
-        console.log("Message received:", event.data);
+      eventSource.onmessage = (event) => {
+        const lines = event.data.split("\n");
+
+        lines.forEach((line) => {
+          if (!line.trim()) return;
+
+          tempBuffer.push(line.trim());
+
+          if (line.startsWith("timestamp:")) {
+            if (tempBuffer.length === 3) {
+              displayLog(tempBuffer[0], tempBuffer[1], tempBuffer[2]);
+            }
+            tempBuffer = [];
+          }
+        });
       };
 
-      eventSource.onerror = function (error) {
+      function displayLog(levelLine, messageLine, timestampLine) {
+        let levelText = levelLine.replace("level: ", "");
+        levelText = levelText.replace("Level.", "");
+
+        let color = "#333";
+        let emoji = "";
+
+        let lcLevel = levelText.toLowerCase();
+        if (lcLevel.includes("trace") || lcLevel.includes("verbose")) {
+          color = "black";
+          emoji = "🔍";
+        } else if (lcLevel.includes("debug")) {
+          color = "black";
+          emoji = "🐛";
+        } else if (lcLevel.includes("info")) {
+          color = "#2196F3"; // light blue
+          emoji = "💡";
+        } else if (lcLevel.includes("warning")) {
+          color = "orange";
+          emoji = "⚠";
+        } else if (lcLevel.includes("error")) {
+          color = "red";
+          emoji = "⛔";
+        } else if (lcLevel.includes("fatal") || lcLevel.includes("wtf")) {
+          color = "purple";
+          emoji = "🔥";
+          if (lcLevel.includes("wtf")) {
+            emoji = "🤯";
+          }
+        }
+
+        const container = document.createElement("div");
+        container.style.color = color;
+        container.style.marginBottom = "8px";
+
+        const levelEl = document.createElement("div");
+        levelEl.textContent = `${emoji} ${levelLine.replace("Level.", "")}`;
+
+        const messageEl = document.createElement("div");
+        messageEl.textContent = messageLine;
+
+        const timestampEl = document.createElement("div");
+        timestampEl.textContent = timestampLine;
+
+        container.appendChild(levelEl);
+        container.appendChild(messageEl);
+        container.appendChild(timestampEl);
+
+        logContainer.appendChild(container);
+
+        // Auto-scroll to bottom
+        logContainer.scrollTop = logContainer.scrollHeight;
+      }
+
+      eventSource.onerror = (error) => {
         console.error("EventSource failed:", error);
       };
     </script>
