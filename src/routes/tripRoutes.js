@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Trip = require("../models/trip");
+const Vehicle = require("../models/vehicle");
 const { mergeTrips } = require("../services/tripService");
 const formatDate = require("../utility");
 const {
@@ -9,6 +10,7 @@ const {
   authenticateAnyApiKey,
   authorize,
 } = require("../services/authenticationService");
+const vehicle = require("../models/vehicle");
 
 // getting all trips
 router.get("/trips", authenticateAdminApiKey, async (req, res) => {
@@ -29,6 +31,30 @@ router.get("/trip/:id", getTrip, authenticateAdminApiKey, async (req, res) => {
 router.post("/trip", authenticateAnyApiKey, async (req, res) => {
   const timestamp = formatDate(new Date());
   console.log(req.body);
+  if (!req.body.vehicle?.vin) {
+    return res.status(400).json({ message: "Vehicle VIN is required" });
+  }
+
+  const vehicleData = req.body.vehicle;
+  try {
+    let vehicle = await Vehicle.findOne({ _id: vehicleData.vin });
+    if (!vehicle) {
+      vehicle = new Vehicle({
+        _id: vehicleData.vin,
+        manufacturer: vehicleData.manufacturer,
+        year: vehicleData.year,
+        region: vehicleData.region,
+      });
+      await vehicle.save();
+      console.log(`New vehicle created: ${vehicleData.vin}`);
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error checking or creating vehicle", error });
+    console.log(error);
+    return;
+  }
   const trip = new Trip({
     startLocation: req.body.startLocation,
     endLocation: req.body.endLocation,
@@ -40,7 +66,7 @@ router.post("/trip", authenticateAnyApiKey, async (req, res) => {
     tripPurpose: req.body.tripPurpose,
     tripNotes: req.body.tripNotes,
     tripStatus: req.body.tripStatus,
-    vehicleId: req.body.vin,
+    vehicleId: vehicleData.vin,
     recorded: req.body.recorded,
   });
   if (req.body.recorded == false) {
@@ -209,6 +235,15 @@ router.patch("/trip/:id", getTrip, authorize, async (req, res) => {
     res.json(updatedTrip);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+router.delete("/trips", authenticateAdminApiKey, async (req, res) => {
+  try {
+    await Trip.deleteMany();
+    res.json({ message: "All trips deleted" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

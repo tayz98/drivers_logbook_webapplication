@@ -10,9 +10,9 @@ const vehicleSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  brand: {
+  manufacturer: {
     type: String,
-    required: false,
+    required: true,
   },
   model: {
     type: String,
@@ -20,7 +20,7 @@ const vehicleSchema = new mongoose.Schema({
   },
   year: {
     type: Number,
-    required: false,
+    required: true,
   },
   licensePlate: {
     type: String,
