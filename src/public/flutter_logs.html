@@ -11,38 +11,121 @@
         font-family: Arial, sans-serif;
         background-color: #f4f4f9;
         color: #333;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
       }
       header {
         background-color: #6200ea;
         color: white;
-        padding: 1rem;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 0.8rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        flex-shrink: 0;
+      }
+      .search-container {
+        position: relative;
+      }
+      #searchInput {
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        border: none;
+        outline: none;
+        width: 180px;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 0.95em;
+      }
+      #searchInput::placeholder {
+        color: rgba(255, 255, 255, 0.7);
       }
       #logContainer {
-        padding: 1rem;
-        margin: 1rem;
+        flex-grow: 1;
+        padding: 0.8rem;
+        margin: 0.8rem;
         background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        white-space: pre-wrap;
-        word-wrap: break-word;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         overflow-y: auto;
-        max-height: 80vh;
+      }
+      .log-entry {
+        margin-bottom: 4px;
+        padding: 8px;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        font-size: 0.95em;
+        line-height: 1.4;
+      }
+      .log-level {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 3px;
+      }
+      .log-message {
+        margin: 3px 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .log-timestamp {
+        font-size: 0.8em;
+        color: #888;
+        margin: 0;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 600px) {
+        header {
+          flex-direction: column;
+          gap: 0.8rem;
+          padding: 0.8rem;
+        }
+        #searchInput {
+          width: 100%;
+          max-width: 300px;
+        }
+        #logContainer {
+          margin: 0.4rem;
+          padding: 0.6rem;
+        }
+        .log-entry {
+          padding: 6px;
+          font-size: 0.9em;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .log-level {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2px;
+        }
       }
     </style>
   </head>
   <body>
     <header>
-      <h3>Flutter Logs</h3>
+      <h3 style="margin: 0; font-size: 1.1em">Flutter Logs</h3>
+      <div class="search-container">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search messages..."
+          autocomplete="off"
+        />
+      </div>
     </header>
     <div id="logContainer"></div>
 
     <script>
       const logContainer = document.getElementById("logContainer");
+      const searchInput = document.getElementById("searchInput");
       const eventSource = new EventSource("/stream_flutter_logs");
 
       let tempBuffer = [];
+      let allLogs = [];
 
       eventSource.onopen = () => {
         console.log("Connection to /flutter_logs opened.");
@@ -58,21 +141,30 @@
 
           if (line.startsWith("timestamp:")) {
             if (tempBuffer.length === 3) {
-              displayLog(tempBuffer[0], tempBuffer[1], tempBuffer[2]);
+              const logEntry = {
+                level: tempBuffer[0],
+                message: tempBuffer[1],
+                timestamp: tempBuffer[2],
+              };
+              allLogs.push(logEntry);
+              displayLog(logEntry);
             }
             tempBuffer = [];
           }
         });
       };
 
-      function displayLog(levelLine, messageLine, timestampLine) {
-        let levelText = levelLine.replace("level: ", "");
-        levelText = levelText.replace("Level.", "");
+      function displayLog(logEntry) {
+        const container = document.createElement("div");
+        container.className = "log-entry";
 
+        let levelText = logEntry.level
+          .replace("level: ", "")
+          .replace("Level.", "");
         let color = "#333";
         let emoji = "";
 
-        let lcLevel = levelText.toLowerCase();
+        const lcLevel = levelText.toLowerCase();
         if (lcLevel.includes("trace") || lcLevel.includes("verbose")) {
           color = "black";
           emoji = "🔍";
@@ -80,7 +172,7 @@
           color = "black";
           emoji = "🐛";
         } else if (lcLevel.includes("info")) {
-          color = "#2196F3"; // light blue
+          color = "#2196F3";
           emoji = "💡";
         } else if (lcLevel.includes("warning")) {
           color = "orange";
@@ -91,33 +183,35 @@
         } else if (lcLevel.includes("fatal") || lcLevel.includes("wtf")) {
           color = "purple";
           emoji = "🔥";
-          if (lcLevel.includes("wtf")) {
-            emoji = "🤯";
-          }
+          if (lcLevel.includes("wtf")) emoji = "🤯";
         }
 
-        const container = document.createElement("div");
-        container.style.color = color;
-        container.style.marginBottom = "8px";
-
-        const levelEl = document.createElement("div");
-        levelEl.textContent = `${emoji} ${levelLine.replace("Level.", "")}`;
-
-        const messageEl = document.createElement("div");
-        messageEl.textContent = messageLine;
-
-        const timestampEl = document.createElement("div");
-        timestampEl.textContent = timestampLine;
-
-        container.appendChild(levelEl);
-        container.appendChild(messageEl);
-        container.appendChild(timestampEl);
+        container.innerHTML = `
+          <div class="log-level" style="color: ${color}">
+            <span>${emoji}</span>
+            <span>${levelText}</span>
+          </div>
+          <div class="log-message">${logEntry.message}</div>
+          <div class="log-timestamp">${logEntry.timestamp}</div>
+        `;
 
         logContainer.appendChild(container);
-
-        // Auto-scroll to bottom
         logContainer.scrollTop = logContainer.scrollHeight;
+        filterLogs();
       }
+
+      function filterLogs() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const entries = document.querySelectorAll(".log-entry");
+
+        entries.forEach((entry) => {
+          const messageDiv = entry.querySelector(".log-message");
+          const messageText = messageDiv.textContent.toLowerCase();
+          entry.classList.toggle("hidden", !messageText.includes(searchTerm));
+        });
+      }
+
+      searchInput.addEventListener("input", filterLogs);
 
       eventSource.onerror = (error) => {
         console.error("EventSource failed:", error);
