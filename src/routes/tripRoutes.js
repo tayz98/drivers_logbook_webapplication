@@ -29,7 +29,7 @@ router.get("/trip/:id", getTrip, authenticateAdminApiKey, async (req, res) => {
 
 // creating a trip
 router.post("/trip", authenticateAnyApiKey, async (req, res) => {
-  const timestamp = formatDate(new Date());
+  const timestamp = new Date().toLocaleString();
   console.log(req.body);
   if (!req.body.vehicle?.vin) {
     return res.status(400).json({ message: "Vehicle VIN is required" });
@@ -41,9 +41,9 @@ router.post("/trip", authenticateAnyApiKey, async (req, res) => {
     if (!vehicle) {
       vehicle = new Vehicle({
         _id: vehicleData.vin,
-        manufacturer: vehicleData.manufacturer,
-        year: vehicleData.year,
-        region: vehicleData.region,
+        manufacturer: vehicleData.manufacturer ?? "",
+        year: vehicleData.year ?? 0,
+        region: vehicleData.region ?? "",
       });
       await vehicle.save();
       console.log(`New vehicle created: ${vehicleData.vin}`);
@@ -97,7 +97,7 @@ router.patch("/trip/:id", getTrip, authorize, async (req, res) => {
     });
   }
 
-  const timestamp = formatDate(today);
+  const timestamp = new Date().toLocaleString();
   if (req.body.isInvalid == true) {
     res.trip.tripNotes.push(
       `Die Fahrt wurde versehentlich aufgezeichnet und am ${timestamp} als ungültig markiert.`

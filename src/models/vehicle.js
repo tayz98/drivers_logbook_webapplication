@@ -16,11 +16,15 @@ const vehicleSchema = new mongoose.Schema({
   },
   model: {
     type: String,
-    required: false,
+    required: true,
   },
   year: {
     type: Number,
     required: true,
+  },
+  make: {
+    type: String,
+    required: false,
   },
   licensePlate: {
     type: String,

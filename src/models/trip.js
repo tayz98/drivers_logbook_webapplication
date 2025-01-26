@@ -2,17 +2,20 @@ const mongoose = require("mongoose");
 const Vehicle = require("./vehicle");
 const locationSchema = require("./location");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
+const Trip = require("./trip");
 
 const tripSchema = new mongoose.Schema({
   _id: {
     type: Number,
     required: false,
   },
+  // if a trip is created manually
   recorded: {
     type: Boolean,
     required: false,
     default: true,
   },
+  // if a trip has been checked
   checked: {
     type: Boolean,
     required: false,
@@ -20,7 +23,7 @@ const tripSchema = new mongoose.Schema({
   },
   startLocation: {
     type: locationSchema,
-    required: true,
+    required: false,
   },
   endLocation: {
     type: locationSchema,
@@ -36,7 +39,7 @@ const tripSchema = new mongoose.Schema({
   },
   startMileage: {
     type: Number,
-    required: true,
+    required: false,
   },
   endMileage: {
     type: Number,
@@ -47,25 +50,32 @@ const tripSchema = new mongoose.Schema({
     enum: ["business", "commute", "private"],
     required: true,
   },
+  // purpose of the trip, e.g. meeting, customer visit, etc.
   tripPurpose: {
     type: String,
     required: false,
   },
+  // every later change of the trip data is stored in the trip notes
   tripNotes: {
     type: [String],
     required: false,
     default: [],
   },
+  // comment if a detour was taken during the trip
   detourNote: {
     type: String,
     required: false,
     default: "",
   },
+  // trips can be recorded as completed or incorrect
+  // completed = all trip data is correct
+  // incorrect = missing data
   tripStatus: {
     type: String,
-    enum: ["finished", "cancelled"],
+    enum: ["completed", "incorrect"],
     required: true,
   },
+  // every trip belongs to a vehicle
   vehicleId: {
     type: String,
     ref: "Vehicle",
@@ -78,6 +88,7 @@ const tripSchema = new mongoose.Schema({
       message: "Vehicle does not exist",
     },
   },
+  // trips that are merged or replaced by another trip
   replacedByTripId: {
     type: Number,
     ref: "Trip",
@@ -95,6 +106,7 @@ const tripSchema = new mongoose.Schema({
     required: false,
     default: Date.now,
   },
+  // trips can be marked as invalid in the web app
   isInvalid: {
     type: Boolean,
     required: false,
