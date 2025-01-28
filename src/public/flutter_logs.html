@@ -167,34 +167,54 @@
       };
 
       eventSource.onmessage = (event) => {
-        const logEntry = JSON.parse(event.data); // Parse structured JSON log
-        allLogs.push(logEntry); // Add to log list
-        displayLogs(); // Update displayed logs
+        try {
+          // The server sends an array of log objects in each event
+          const newLogEntries = JSON.parse(event.data);
+
+          // If it's an array, spread it in; if it's a single object, push it
+          if (Array.isArray(newLogEntries)) {
+            allLogs.push(...newLogEntries);
+          } else {
+            allLogs.push(newLogEntries);
+          }
+
+          displayLogs();
+        } catch (err) {
+          console.error("Failed to parse incoming log data:", err);
+        }
       };
 
       // Function to display logs
       function displayLogs() {
-        logContainer.innerHTML = ""; // Clear container
+        logContainer.innerHTML = "";
 
-        // Filter logs based on search input
         const searchTerm = searchInput.value.trim().toLowerCase();
-        const filteredLogs = allLogs.filter(
-          (log) =>
+
+        const filteredLogs = allLogs.filter((log) => {
+          // Safeguard: skip if log or fields are missing
+          if (!log || !log.message || !log.level) return false;
+
+          // Check if message or the stripped level matches search
+          return (
             log.message.toLowerCase().includes(searchTerm) ||
             log.level.replace("Level.", "").toLowerCase() === searchTerm
-        );
+          );
+        });
 
-        // Display each log
         filteredLogs.forEach((logEntry) => {
           const container = document.createElement("div");
           container.className = "log-entry";
 
-          const emoji = getEmojiForLevel(logEntry.level.toLowerCase());
-          const formattedTimestamp = formatDate(new Date(logEntry.timestamp));
-          const color = getColorForLevel(logEntry.level.toLowerCase());
+          // Convert "Level.debug" -> "level.debug" -> includes("debug")
+          const levelLC = logEntry.level.toLowerCase();
+          const color = getColorForLevel(levelLC);
+          const emoji = getEmojiForLevel(levelLC);
+
+          // timestamp is an ISO string, parse & format
+          const dateObj = new Date(logEntry.timestamp);
+          const formattedTimestamp = formatDate(dateObj);
 
           container.style.color = color;
-
           container.innerHTML = `
             <div class="log-level">
               <span>${emoji}</span>
@@ -206,7 +226,7 @@
           logContainer.appendChild(container);
         });
 
-        // Auto-scroll if enabled
+        // Auto-scroll if user hasn't scrolled away
         if (autoScroll) {
           logContainer.scrollTop = logContainer.scrollHeight;
         }
