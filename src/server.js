@@ -12,12 +12,12 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static("public"));
 app.use(cors());
-app.use(loggerMiddleware);
+// app.use(loggerMiddleware);
 
 // Mount Routes
 app.use("/", routes);
 
-// Error Middleware
+// // Error Middleware
 app.use(errorMiddleware);
 
 // Start Server

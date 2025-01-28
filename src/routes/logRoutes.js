@@ -5,7 +5,7 @@ const readline = require("node:readline");
 
 const router = express.Router();
 const FLUTTER_LOG_FILE = path.join(__dirname, "../logs/flutter_app.log");
-const MAX_LOG_ENTRIES = 200;
+const MAX_LOG_ENTRIES = 1000;
 
 // Stream logs
 router.get("/stream_flutter_logs", (req, res) => {
