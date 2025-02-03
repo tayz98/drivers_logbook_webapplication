@@ -22,6 +22,7 @@ const vehicleSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  // TODO: probably remove this field
   make: {
     type: String,
     required: false,

@@ -8,7 +8,6 @@ const {
   authenticateAdminApiKey,
   authenticateDriverApiKey,
   authenticateAnyApiKey,
-  authorize,
 } = require("../services/authenticationService");
 const vehicle = require("../models/vehicle");
 
@@ -31,29 +30,29 @@ router.get("/trip/:id", getTrip, authenticateAdminApiKey, async (req, res) => {
 router.post("/trip", authenticateAnyApiKey, async (req, res) => {
   const timestamp = new Date().toLocaleString();
   console.log(req.body);
-  if (!req.body.vehicle?.vin) {
-    return res.status(400).json({ message: "Vehicle VIN is required" });
-  }
-
-  const vehicleData = req.body.vehicle;
-  try {
-    let vehicle = await Vehicle.findOne({ _id: vehicleData.vin });
-    if (!vehicle) {
-      vehicle = new Vehicle({
-        _id: vehicleData.vin,
-        manufacturer: vehicleData.manufacturer ?? "",
-        year: vehicleData.year ?? 0,
-        region: vehicleData.region ?? "",
-      });
-      await vehicle.save();
-      console.log(`New vehicle created: ${vehicleData.vin}`);
+  let vehicleId = null;
+  if (req.body.vehicle) {
+    const vehicleData = req.body.vehicle;
+    try {
+      let vehicle = await Vehicle.findOne({ _id: vehicleData.vin });
+      if (!vehicle) {
+        vehicle = new Vehicle({
+          _id: vehicleData.vin,
+          manufacturer: vehicleData.manufacturer ?? "",
+          year: vehicleData.year ?? 0,
+          region: vehicleData.region ?? "",
+        });
+        await vehicle.save();
+        console.log(`New vehicle created: ${vehicleData.vin}`);
+      }
+      vehicleId = vehicleData.vin;
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Error checking or creating vehicle", error });
+      console.log(error);
+      return;
     }
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error checking or creating vehicle", error });
-    console.log(error);
-    return;
   }
   const trip = new Trip({
     startLocation: req.body.startLocation,
@@ -66,7 +65,7 @@ router.post("/trip", authenticateAnyApiKey, async (req, res) => {
     tripPurpose: req.body.tripPurpose,
     tripNotes: req.body.tripNotes,
     tripStatus: req.body.tripStatus,
-    vehicleId: vehicleData.vin,
+    vehicleId: vehicleData.vin ?? null,
     recorded: req.body.recorded,
   });
   if (req.body.recorded == false) {
@@ -85,7 +84,8 @@ router.post("/trip", authenticateAnyApiKey, async (req, res) => {
 });
 
 // updating one trip by id
-router.patch("/trip/:id", getTrip, authorize, async (req, res) => {
+// TODO: rethink what is editable and what now
+router.patch("/trip/:id", getTrip, async (req, res) => {
   if (!isTripEditableWithinSevenDays(res.trip)) {
     return res.status(403).json({
       message: "You are not allowed to edit trips older than 7 days!",
@@ -238,6 +238,7 @@ router.patch("/trip/:id", getTrip, authorize, async (req, res) => {
   }
 });
 
+// delete multiple trips at once
 router.delete("/trips", authenticateAdminApiKey, async (req, res) => {
   try {
     await Trip.deleteMany();
@@ -248,7 +249,7 @@ router.delete("/trips", authenticateAdminApiKey, async (req, res) => {
 });
 
 // deleting one trip by id
-router.delete("/trip/:id", getTrip, authorize, async (req, res) => {
+router.delete("/trip/:id", getTrip, async (req, res) => {
   try {
     await res.trip.deleteOne();
     res.json({ message: "Trip deleted" });
@@ -257,22 +258,14 @@ router.delete("/trip/:id", getTrip, authorize, async (req, res) => {
   }
 });
 
-// get trips for webUser
-// if webUser is dispatcher, show all business trips
-// if webUser is driver or manager show only own trips (all categories)
-// if webUser is admin, show all trips
-// show only trips that are not older than 7 days
-// make it possible to filter by checked/unchecked
-// don't show invalid trips anymore
-router.get("/trips/:webUserId", getWebUser, authorize, async (req, res) => {
+// TODO: look over it again
+router.get("/trips/:webUserId", getWebUser, async (req, res) => {
   try {
     const webUser = res.webUser;
     let trips;
     if (webUser.role === "dispatcher") {
       trips = await Trip.find({
         tripCategory: "business",
-        checked: req.query.checked,
-        isInvalid: false,
         startTimestamp: {
           $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
         },
@@ -280,14 +273,16 @@ router.get("/trips/:webUserId", getWebUser, authorize, async (req, res) => {
     } else if (webUser.role === "manager") {
       trips = await Trip.find({
         vehicleId: webUser.vehicleId,
-        checked: req.query.checked,
-        isInvalid: false,
         startTimestamp: {
           $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
         },
       });
     } else if (webUser.role === "admin") {
-      trips = await Trip.find({});
+      trips = await Trip.find({
+        startTimestamp: {
+          $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
+        },
+      });
     }
     res.json(trips);
   } catch (error) {
@@ -310,6 +305,7 @@ async function getTrip(req, res, next) {
   next();
 }
 // middleware
+// TODO increase length, allow more than two trips
 async function getAllTrips(req, res, next) {
   try {
     const tripIds = req.body.tripIds;
@@ -347,7 +343,8 @@ async function getWebUser(req, res, next) {
   next();
 }
 
-router.post("/merge-trips", getAllTrips, authorize, async (req, res) => {
+// TODO: allow more than two trips
+router.post("/merge-trips", getAllTrips, async (req, res) => {
   try {
     const trips = res.trips;
     if (trips.some((trip) => isInvalid)) {
@@ -368,6 +365,7 @@ router.post("/merge-trips", getAllTrips, authorize, async (req, res) => {
   }
 });
 
+// for export
 router.get("/tripsInRange", async (req, res) => {
   try {
     // user provides ?fromDate=...&toDate=... as query parameters

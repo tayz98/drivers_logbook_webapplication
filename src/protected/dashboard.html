@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaCorp - Fahrtenbuch</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <link href="./styles.css" rel="stylesheet" />
+  </head>
+  <body class="custom-body">
+    <header class="custom-header fixed-top">
+      <div class="container-fluid d-flex align-items-center">
+        <span class="brand">NovaCorp</span>
+      </div>
+    </header>
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            <i class="bi bi-person" id="person-icon"></i>
+            <div class="name-wrapper">
+              <span id="userFirstName">Vorname</span>
+              <span id="userLastName">Nachname</span>
+            </div>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            <i class="bi bi-house"></i> Startseite
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            <i class="bi bi-car-front"></i> Fahrzeuge
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            <i class="bi bi-journal"></i> Bericht
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="bi bi-gear"></i> Einstellungen
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="bi bi-power"></i> Abmelden
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        Sitzung läuft ab in: <span id="session-timer">--:--</span>
+      </div>
+    </nav>
+
+    <!-- HAUPTBEREICH -->
+    <main class="main-content">
+      <div class="button-container">
+        <button class="my-button">Mein Button</button>
+      </div>
+
+      <!-- GRID -->
+      <div class="container-fluid my-3">
+        <div class="row align-items-center gx-0 border rounded p-2 bg-primary">
+          <div class="col-auto">
+            <!-- A checkable checkbox -->
+            <input type="checkbox" class="form-check-input" id="checkbox1" />
+            <label class="form-check-label" for="checkbox1"></label>
+          </div>
+          <div class="col">
+            <span>Heute: 03.02.2025</span>
+          </div>
+          <div class="col-auto">
+            <span class="bi bi-trash"></span>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="/script.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", loadUserFirstAndLastNames);
+      document.addEventListener("DOMContentLoaded", loadSessionInfo);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="http://localhost:1516/livereload.js?snipver=1"></script>
+  </body>
+</html>

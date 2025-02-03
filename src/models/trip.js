@@ -61,6 +61,14 @@ const tripSchema = new mongoose.Schema({
     required: false,
     default: [],
   },
+  clientCompany: {
+    type: String,
+    required: false,
+  },
+  client: {
+    type: String,
+    required: false,
+  },
   // comment if a detour was taken during the trip
   detourNote: {
     type: String,
@@ -101,6 +109,7 @@ const tripSchema = new mongoose.Schema({
       message: "Trip does not exist",
     },
   },
+
   receivedDate: {
     type: Date,
     required: false,

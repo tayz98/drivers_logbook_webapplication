@@ -1,14 +1,20 @@
 const mongoose = require("mongoose");
 const Vehicle = require("./vehicle");
 
-// TODO: add encryption for password
-
 const webUserSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
   },
   password: {
+    type: String,
+    required: true,
+  },
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
     type: String,
     required: true,
   },

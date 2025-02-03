@@ -1,17 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/webUser");
-const {
-  authorize,
-  authToken,
-  restrictToOwnData,
-  authenticateAdminApiKey,
-  authenticateAdminApiKey,
-  RefreshToken,
-} = require("../services/authenticationService");
+const bcrypt = require("bcryptjs");
+const saltRounds = 10;
+
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const { authenticateAdminApiKey } = require("../services/apiKeyService");
+const {
+  authenticateAdminApiKey,
+} = require("../services/authenticationService");
 const { create } = require("../models/vehicle");
 require("dotenv").config();
 
@@ -30,11 +26,33 @@ router.get("/user/:id", authenticateAdminApiKey, getUser, async (req, res) => {
   res.json(res.user);
 });
 
+router.get("/user", async (req, res) => {
+  if (req.session && req.session.user) {
+    return res.json({
+      firstName: req.session.user.firstName,
+      lastName: req.session.user.lastName,
+    });
+  }
+  return res.status(401).json({ message: "Not authorized" });
+});
+
+router.get("/session-info", (req, res) => {
+  if (req.session && req.session.cookie) {
+    const expireTimestamp = Date.now() + req.session.cookie.maxAge;
+    res.json({ expireTimestamp });
+  } else {
+    res.status(401).json({ error: "Not logged in" });
+  }
+});
+
 // creating a user
 router.post("/user", authenticateAdminApiKey, async (req, res) => {
+  const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
   const user = new User({
     username: req.body.username,
-    password: req.body.password,
+    password: hashedPassword,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
     email: req.body.email,
     role: req.body.role,
     vehicleId: req.body.vehicleId,
@@ -46,6 +64,8 @@ router.post("/user", authenticateAdminApiKey, async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+
+// TODO: anmeldung sitzungsbasiert (kann ablaufen)
 
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -63,88 +83,52 @@ router.post("/login", async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-    const accessToken = jwt.sign(
-      { userId: user._id, username: user.username },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1h" }
-    );
-    const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
-    const newRefreshToken = new RefreshToken({
-      token: refreshToken,
-      userId: user._id,
-    });
 
-    await newRefreshToken.save();
+    req.session.user = user;
+    console.log("Session set: ", req.session);
 
-    res.json({ accessToken: accessToken });
+    return res.redirect("/");
   } catch (error) {
+    console.log("Error: ", error);
     res.status(500).json({ message: error.message });
   }
 });
 
-app.post("/token", async (req, res) => {
-  const refreshToken = req.body.token;
-  if (!refreshToken)
-    return res.status(401).json({ message: "Refresh token is missing." });
-
-  // Check if token exists in the database
-  const storedToken = await RefreshToken.findOne({ token: refreshToken });
-  if (!storedToken)
-    return res.status(403).json({ message: "Invalid refresh token." });
-
-  // Verify the token
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-    if (err)
-      return res.status(403).json({ message: "Token expired or invalid." });
-
-    const accessToken = generateAccessToken({
-      userId: user._id,
-      username: user.username,
-    });
-    res.json({ accessToken });
+// delete cookie when logging out
+router.post("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Logout failed" });
+    }
+    res.clearCookie("connect.sid");
+    res.json({ message: "Logged out successfully" });
   });
 });
 
-app.delete("/logout", async (req, res) => {
-  const refreshToken = req.body.token;
-  if (!refreshToken) return res.sendStatus(401);
-
-  // Delete token from the database
-  await RefreshToken.deleteOne({ token: refreshToken });
-
-  res.sendStatus(204);
-});
-
-// updating one user by id
-router.patch(
-  "/user/:id",
-  getUser,
-  authorize,
-  restrictToOwnData,
-  async (req, res) => {
-    if (req.body.username != null) {
-      res.user.username = req.body.username;
-    }
-    if (req.body.password != null) {
-      res.user.password = req.body.password;
-    }
-    if (req.body.email != null) {
-      res.user.email = req.body.email;
-    }
-    if (req.body.role != null) {
-      res.user.role = req.body.role;
-    }
-    if (req.body.vehicleId != null) {
-      res.user.vehicleId = req.body.vehicleId;
-    }
-    try {
-      const updatedUser = await res.user.save();
-      res.json(updatedUser);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+// updating one user by id e.g. changing password
+router.patch("/user/:id", getUser, async (req, res) => {
+  if (req.body.username != null) {
+    res.user.username = req.body.username;
   }
-);
+  if (req.body.password != null) {
+    res.user.password = req.body.password;
+  }
+  if (req.body.email != null) {
+    res.user.email = req.body.email;
+  }
+  if (req.body.role != null) {
+    res.user.role = req.body.role;
+  }
+  if (req.body.vehicleId != null) {
+    res.user.vehicleId = req.body.vehicleId;
+  }
+  try {
+    const updatedUser = await res.user.save();
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
 router.delete(
   "/user/:id",
@@ -175,3 +159,5 @@ async function getUser(req, res, next) {
   res.user = user;
   next();
 }
+
+module.exports = router;

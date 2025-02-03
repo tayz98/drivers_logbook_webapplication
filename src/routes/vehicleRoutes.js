@@ -4,6 +4,8 @@ const router = express.Router();
 
 // getting all vehicles
 
+// make and manucacturer überlegen
+
 router.get("/vehicles", async (req, res) => {
   try {
     const vehicles = await Vehicle.find();
