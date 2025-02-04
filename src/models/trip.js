@@ -30,11 +30,11 @@ const tripSchema = new mongoose.Schema({
     required: false,
   },
   startTimestamp: {
-    type: String,
+    type: Date,
     required: true,
   },
   endTimestamp: {
-    type: String,
+    type: Date,
     required: true,
   },
   startMileage: {
@@ -114,12 +114,6 @@ const tripSchema = new mongoose.Schema({
     type: Date,
     required: false,
     default: Date.now,
-  },
-  // trips can be marked as invalid in the web app
-  isInvalid: {
-    type: Boolean,
-    required: false,
-    default: false,
   },
 });
 

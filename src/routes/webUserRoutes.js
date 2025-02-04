@@ -9,6 +9,8 @@ const {
   authenticateAdminApiKey,
 } = require("../services/authenticationService");
 const { create } = require("../models/vehicle");
+const webUser = require("../models/webUser");
+const { loadUser } = require("../middleware/userMiddleware");
 require("dotenv").config();
 
 // getting all users
@@ -22,7 +24,7 @@ router.get("/users", authenticateAdminApiKey, async (req, res) => {
 });
 
 // getting one user by id
-router.get("/user/:id", authenticateAdminApiKey, getUser, async (req, res) => {
+router.get("/user/:id", authenticateAdminApiKey, loadUser, async (req, res) => {
   res.json(res.user);
 });
 
@@ -31,6 +33,7 @@ router.get("/user", async (req, res) => {
     return res.json({
       firstName: req.session.user.firstName,
       lastName: req.session.user.lastName,
+      webUserId: req.session.user._id,
     });
   }
   return res.status(401).json({ message: "Not authorized" });
@@ -39,7 +42,9 @@ router.get("/user", async (req, res) => {
 router.get("/session-info", (req, res) => {
   if (req.session && req.session.cookie) {
     const expireTimestamp = Date.now() + req.session.cookie.maxAge;
-    res.json({ expireTimestamp });
+    res.json({
+      expireTimestamp,
+    });
   } else {
     res.status(401).json({ error: "Not logged in" });
   }
@@ -65,8 +70,6 @@ router.post("/user", authenticateAdminApiKey, async (req, res) => {
   }
 });
 
-// TODO: anmeldung sitzungsbasiert (kann ablaufen)
-
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -84,7 +87,12 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    req.session.user = user;
+    req.session.user = {
+      _id: user._id.toString(),
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
     console.log("Session set: ", req.session);
 
     return res.redirect("/");
@@ -96,17 +104,24 @@ router.post("/login", async (req, res) => {
 
 // delete cookie when logging out
 router.post("/logout", (req, res) => {
+  console.log("Logout called");
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ message: "Logout failed" });
     }
-    res.clearCookie("connect.sid");
-    res.json({ message: "Logged out successfully" });
+    res.clearCookie("connect.sid", {
+      path: "/",
+      sameSite: "Lax",
+      httpOnly: false,
+      secure: false,
+    });
+    console.log("Session destroyed");
+    res.status(200).json({ message: "Logged out successfully" });
   });
 });
 
 // updating one user by id e.g. changing password
-router.patch("/user/:id", getUser, async (req, res) => {
+router.patch("/user/:id", loadUser, async (req, res) => {
   if (req.body.username != null) {
     res.user.username = req.body.username;
   }
@@ -132,7 +147,7 @@ router.patch("/user/:id", getUser, async (req, res) => {
 
 router.delete(
   "/user/:id",
-  getUser,
+  loadUser,
   authenticateAdminApiKey,
   async (req, res) => {
     try {
@@ -144,20 +159,20 @@ router.delete(
   }
 );
 
-// middleware
-async function getUser(req, res, next) {
-  let user;
-  try {
-    user = await User.findById(req.params.id);
-    if (user == null) {
-      return res.status(404).json({ message: "User not found" });
-    }
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
+// // middleware
+// async function getUser(req, res, next) {
+//   let user;
+//   try {
+//     user = await User.findById(req.params.id);
+//     if (user == null) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+//   } catch (error) {
+//     return res.status(500).json({ message: error.message });
+//   }
 
-  res.user = user;
-  next();
-}
+//   res.user = user;
+//   next();
+// }
 
 module.exports = router;

@@ -16,6 +16,10 @@ router.get("/", (req, res) => {
   }
 });
 
+router.get("/vehicles", (req, res) => {
+  return res.sendFile(path.join(__dirname, "..", "protected", "vehicles.html"));
+});
+
 router.get("/flutter_logs", (req, res) => {
   return res.sendFile(
     path.join(__dirname, "..", "public", "flutter_logs.html")

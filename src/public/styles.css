@@ -57,6 +57,10 @@ body {
   color: black;
 }
 
+.date-row {
+  height: fit-content !important;
+}
+
 #togglePassword {
   position: absolute;
   top: 50%;
@@ -88,6 +92,149 @@ body {
 
 .button-container {
   text-align: left;
+}
+
+.grid-form-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%; /* Add this */
+}
+
+/* Floating Labels */
+.form-floating-line {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+/* Platzhalter-Text ausblenden */
+.form-control-line-select option[disabled][hidden] {
+  display: none;
+}
+
+/* Optionen normale Farbe */
+.form-control-line-select option {
+  color: #000;
+  background: white;
+}
+
+/* Fokus-State für Select */
+.form-control-line-select:valid + label {
+  transform: translateY(-1.5rem);
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Nur für das Kategorie-Dropdown */
+.form-floating-line.has-dropdown::after {
+  content: "▼";
+  position: absolute;
+  right: 0;
+  bottom: 0.5rem;
+  font-size: 0.7rem;
+  color: #666;
+  pointer-events: none;
+}
+
+.form-floating-line.has-dropdown:focus-within::after {
+  color: #0d6efd;
+}
+.form-control-line {
+  border: none;
+  border-bottom: 1px solid #ccc;
+  border-radius: 0;
+  padding: 0.5rem 0;
+  width: 100%;
+  background: transparent;
+  transition: border-color 0.3s ease;
+}
+
+.form-control-line:focus {
+  outline: none;
+  border-bottom-color: #0d6efd;
+  box-shadow: none;
+}
+
+.form-floating-line label {
+  position: absolute;
+  top: 0.5rem;
+  left: 0;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.form-control-line:focus + label,
+.form-control-line:not(:placeholder-shown) + label {
+  transform: translateY(-1.5rem);
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Zentrierte Felder */
+.form-control-line-center {
+  border: none;
+  border-bottom: 1px solid #ccc;
+  width: 60%;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.form-control-line-select {
+  border: none;
+  border-bottom: 1px solid #ccc;
+  border-radius: 0;
+  padding: 0.5rem 0;
+  width: 100%;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  cursor: pointer;
+}
+
+.form-control-line-select:focus {
+  outline: none;
+  border-bottom-color: #0d6efd;
+}
+
+/* Notizen Feld */
+.form-floating-note textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0.8rem;
+  width: 60%;
+  margin: 2rem auto 0;
+  display: block;
+}
+
+.form-floating-note textarea:focus {
+  border-color: #0d6efd;
+  box-shadow: none;
+}
+
+#gridContainer {
+  flex: 1;
+  max-width: none; /* Override Bootstrap's container max-width */
+  width: auto; /* Remove default container width */
+  padding: 0; /* Remove default container padding */
+  margin: 0; /* Remove default container margins */
+}
+
+#newTripForm {
+  width: 40%;
+  display: none;
+  background: white; /* Optional for better visibility */
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional */
+}
+.resized-grid {
+  width: 40% !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  justify-content: start !important;
 }
 
 .my-button {
@@ -131,6 +278,14 @@ body {
   z-index: 1040;
 }
 
+.selected-row {
+  outline: 2px solid blue !important;
+}
+.fixed-height {
+  height: 70px;
+  overflow: hidden;
+}
+
 .sidebar a {
   color: #aeb8be;
   font-size: 1.5rem;
@@ -154,30 +309,6 @@ body {
   color: #aeb8be;
   font-size: 1.5rem;
   text-align: center;
-}
-
-.content-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.mother-row {
-  background-color: transparent;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-.mother-header {
-  font-size: 1.5rem;
-  font-weight: bold;
-  background-color: #d0d0d0;
-  padding: 0.5rem;
-}
-
-.child-row {
-  background-color: #cccccc;
-  padding: 0.5rem;
 }
 
 @media (min-width: 1024px) {

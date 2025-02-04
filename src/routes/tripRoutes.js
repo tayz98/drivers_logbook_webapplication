@@ -3,24 +3,69 @@ const router = express.Router();
 const Trip = require("../models/trip");
 const Vehicle = require("../models/vehicle");
 const { mergeTrips } = require("../services/tripService");
-const formatDate = require("../utility");
+const { calculateTripDistance } = require("../utility");
+const WebUser = require("../models/webUser");
+const mongoose = require("mongoose");
+const { loadUser } = require("../middleware/userMiddleware");
+
 const {
   authenticateAdminApiKey,
   authenticateDriverApiKey,
   authenticateAnyApiKey,
+  authenticateSessionOrApiKey,
 } = require("../services/authenticationService");
 const vehicle = require("../models/vehicle");
 
 // getting all trips
-router.get("/trips", authenticateAdminApiKey, async (req, res) => {
-  try {
-    const trips = await Trip.find();
-    res.json(trips);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+router.get(
+  "/trips",
+  authenticateSessionOrApiKey,
+  loadUser,
+  async (req, res) => {
+    try {
+      if (req.adminAuthenticated) {
+        const trips = await Trip.find();
+        return res.json(trips);
+      }
 
+      const webUser = res.webUser;
+      if (!webUser) {
+        return res.status(401).json({ message: "Unauthorized Trips access" });
+      }
+
+      const sevenDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const matchStage = { startDate: { $gte: sevenDaysAgo } };
+
+      // Role-specific filters
+      switch (webUser.role) {
+        case "dispatcher":
+          matchStage.tripCategory = "business";
+          break;
+        case "manager":
+          matchStage.vehicleId = webUser.vehicleId;
+          break;
+        case "admin":
+          break;
+        default:
+          return res.status(403).json({ message: "Forbidden" });
+      }
+
+      // TODO: maybe change from aggregate to find, but first need to check data-format (string/date)
+      const trips = await Trip.aggregate([
+        {
+          $addFields: {
+            startDate: { $dateFromString: { dateString: "$startTimestamp" } },
+          },
+        },
+        { $match: matchStage },
+      ]);
+
+      res.json(trips);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 // getting one trip by id
 router.get("/trip/:id", getTrip, authenticateAdminApiKey, async (req, res) => {
   res.json(res.trip);
@@ -57,8 +102,8 @@ router.post("/trip", authenticateAnyApiKey, async (req, res) => {
   const trip = new Trip({
     startLocation: req.body.startLocation,
     endLocation: req.body.endLocation,
-    startTimestamp: req.body.startTimestamp,
-    endTimestamp: req.body.endTimestamp,
+    startTimestamp: startTimestamp,
+    endTimestamp: endTimestamp,
     startMileage: req.body.startMileage,
     endMileage: req.body.endMileage,
     tripCategory: req.body.tripCategory,
@@ -91,20 +136,8 @@ router.patch("/trip/:id", getTrip, async (req, res) => {
       message: "You are not allowed to edit trips older than 7 days!",
     });
   }
-  if (res.trip.isInvalid == true) {
-    return res.status(403).json({
-      message: "You are not allowed to edit invalid trips!",
-    });
-  }
 
   const timestamp = new Date().toLocaleString();
-  if (req.body.isInvalid == true) {
-    res.trip.tripNotes.push(
-      `Die Fahrt wurde versehentlich aufgezeichnet und am ${timestamp} als ungültig markiert.`
-    );
-    isInvalid = true;
-    checked = true;
-  }
 
   if (req.body.checked != null) {
     res.trip.checked = req.body.checked;
@@ -258,38 +291,6 @@ router.delete("/trip/:id", getTrip, async (req, res) => {
   }
 });
 
-// TODO: look over it again
-router.get("/trips/:webUserId", getWebUser, async (req, res) => {
-  try {
-    const webUser = res.webUser;
-    let trips;
-    if (webUser.role === "dispatcher") {
-      trips = await Trip.find({
-        tripCategory: "business",
-        startTimestamp: {
-          $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
-        },
-      });
-    } else if (webUser.role === "manager") {
-      trips = await Trip.find({
-        vehicleId: webUser.vehicleId,
-        startTimestamp: {
-          $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
-        },
-      });
-    } else if (webUser.role === "admin") {
-      trips = await Trip.find({
-        startTimestamp: {
-          $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
-        },
-      });
-    }
-    res.json(trips);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
 // middleware
 async function getTrip(req, res, next) {
   let trip;
@@ -329,25 +330,11 @@ async function getAllTrips(req, res, next) {
   }
 }
 
-async function getWebUser(req, res, next) {
-  let webUser;
-  try {
-    webUser = WebUser.findById(req.params.webUserId);
-    if (webUser == null) {
-      return res.status(404).json({ message: "WebUser not found!" });
-    }
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-  res.webUser = webUser;
-  next();
-}
-
 // TODO: allow more than two trips
 router.post("/merge-trips", getAllTrips, async (req, res) => {
   try {
     const trips = res.trips;
-    if (trips.some((trip) => isInvalid)) {
+    if (trips.some((trip) => tripStatus === "incorrect")) {
       return res.status(403).json({
         message: "You are not allowed to merge invalid trips!",
       });

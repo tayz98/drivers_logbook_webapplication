@@ -30,7 +30,28 @@ function authenticateDriverApiKey(req, res, next) {
   }
   next();
 }
+function authenticateSessionOrApiKey(req, res, next) {
+  if (req.session && req.session.user) {
+    req.authenticatedBySession = true;
+    return next();
+  }
 
+  const apiKey = req.headers["x-api-key"];
+  if (!apiKey) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (apiKey === ADMIN_API_KEY) {
+    req.adminAuthenticated = true;
+  } else if (apiKey === DRIVER_API_KEY) {
+    req.driverAuthenticated = true;
+  } else {
+    return res.status(403).json({ message: "Invalid API key" });
+  }
+
+  req.authenticatedByApiKey = true;
+  next();
+}
 function authenticateAnyApiKey(req, res, next) {
   const apiKey = req.headers["x-api-key"];
   if (!apiKey) {
@@ -49,25 +70,10 @@ function isAuthenticated(req, res, next) {
   return res.status(401).json({ message: "Not authorized" });
 }
 
-// TODO: look at it again later
-function restrictToOwnData(req, res, next) {
-  if (req.isAdmin) {
-    // Admin can update any user
-    return next();
-  }
-  if (req.user && req.user.userId === req.params.id) {
-    // User can update only their own data
-    return next();
-  }
-  return res
-    .status(403)
-    .json({ message: "You are not authorized to update this user." });
-}
-
 module.exports = {
   authenticateAdminApiKey,
   authenticateDriverApiKey,
-  restrictToOwnData,
+  authenticateSessionOrApiKey,
   authenticateAnyApiKey,
   isAuthenticated,
 };

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaCorp - Fahrzeuge</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
+    <link href="./styles.css" rel="stylesheet" />
+  </head>
+  <body class="custom-body">
+    <header class="custom-header fixed-top">
+      <div class="container-fluid d-flex align-items-center">
+        <span class="brand">NovaCorp</span>
+      </div>
+    </header>
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            <i class="bi bi-person" id="person-icon"></i>
+            <div class="name-wrapper">
+              <span id="userFirstName">Vorname</span>
+              <span id="userLastName">Nachname</span>
+            </div>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">
+            <i class="bi bi-house"></i> Startseite
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/vehicles">
+            <i class="bi bi-car-front"></i> Fahrzeuge
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">
+            <i class="bi bi-journal"></i> Bericht
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            <i class="bi bi-gear"></i> Einstellungen
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="logoutButton">
+            <i class="bi bi-power"></i> Abmelden
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        Sitzung läuft ab in: <span id="session-timer">--:--</span>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content p-3">
+      <div class="container-fluid">
+        <div class="row g-3">
+          <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm mb-2 compact-card">
+              <div
+                class="card-header py-1 px-2 d-flex justify-content-between align-items-center bg-primary text-white"
+              >
+                <h6 class="mb-0 small">Audi A4 Limo</h6>
+                <div>
+                  <button
+                    class="btn btn-link p-0 text-white"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editVehicleModal"
+                    title="Bearbeiten"
+                  >
+                    <i class="bi bi-pencil-square fs-6"></i>
+                  </button>
+                  <a href="#" class="text-white ms-1" title="Fahrten anzeigen">
+                    <i class="bi bi-speedometer2 fs-6"></i>
+                  </a>
+                </div>
+              </div>
+
+              <div class="card-body p-2">
+                <dl class="row mb-0 compact-info">
+                  <dt class="col-5 small text-muted">VIN:</dt>
+                  <dd class="col-7 small">WAUZZZ8TZBA123456</dd>
+
+                  <dt class="col-5 small text-muted">Hersteller:</dt>
+                  <dd class="col-7 small">Audi</dd>
+
+                  <dt class="col-5 small text-muted">Jahr:</dt>
+                  <dd class="col-7 small">2023</dd>
+
+                  <dt class="col-5 small text-muted">Herkunft:</dt>
+                  <dd class="col-7 small">DE</dd>
+
+                  <dt class="col-5 small text-muted">PLZ:</dt>
+                  <dd class="col-7 small">80339</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal fade" id="editVehicleModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Fahrzeug bearbeiten</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body"></div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .compact-card {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        line-height: 1.2;
+        width: 55%;
+        transition: all 0.2s ease;
+      }
+
+      .compact-card .card-header {
+        border-radius: 8px 8px 0 0 !important;
+      }
+
+      .compact-info dt {
+        margin-bottom: 0.1rem;
+      }
+
+      .compact-info dd {
+        margin-bottom: 0.3rem;
+      }
+
+      .compact-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+      }
+    </style>
+    <script src="/script.js"></script>
+    <script src="/script_grid.js"></script>
+    <script src="/evenListener.js"></script>
+    <script src="/util.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", loadUserFirstAndLastNames);
+      document.addEventListener("DOMContentLoaded", loadSessionInfo);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="http://localhost:1516/livereload.js?snipver=1"></script>
+  </body>
+</html>
