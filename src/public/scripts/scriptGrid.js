@@ -1,6 +1,13 @@
 async function loadTrips() {
   try {
-    const response = await fetch("/trips", {
+    const vehicleId = getVehicleIdFromUrl();
+    let endpoint = "/api/trips";
+
+    if (vehicleId) {
+      endpoint += `?vehicleId=${encodeURIComponent(vehicleId)}`;
+    }
+
+    const response = await fetch(endpoint, {
       method: "GET",
       credentials: "include",
     });
@@ -23,7 +30,11 @@ const options = {
   year: "numeric",
 };
 
-// Function to create and append HTML elements for each trip
+function getVehicleIdFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get("vehicleId");
+}
+
 function displayTrips(trips) {
   const container = document.getElementById("gridContainer");
   container.innerHTML = "";

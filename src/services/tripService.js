@@ -2,32 +2,40 @@ const Trip = require("../models/trip");
 const formatDate = require("../utility");
 
 async function mergeTrips(trips) {
-  if (trips.length !== 2) {
-    throw new Error("Exactly two trips must be provided for merging.");
-  }
-
-  const [trip1, trip2] = trips;
   const timestamp = formatDate(new Date());
 
-  const mergedTripNotes = [
-    ...trip1.tripNotes,
-    ...trip2.tripNotes,
-    `Die Fahrten mit den IDs ${trip1._id} & ${trip2._id} wurden am ${timestamp} zusammengeführt.`,
-  ];
+  const mergedTripNotes = trips.reduce((acc, trip) => {
+    return acc.concat(trip.tripNotes);
+  }, []);
+
+  const mergedTripIds = trips.map((trip) => trip._id).join(" & ");
+  mergedTripNotes.push(
+    `Die Fahrten mit den IDs ${mergedTripIds} wurden am ${timestamp} zusammengeführt.`
+  );
+
+  const firstTrip = trips.reduce((earliest, trip) => {
+    return trip.startTimestamp < earliest.startTimestamp ? trip : earliest;
+  }, trips[0]);
+
+  const lastTrip = trips.reduce((latest, trip) => {
+    return trip.endTimestamp > latest.endTimestamp ? trip : latest;
+  }, trips[0]);
 
   const mergedTrip = new Trip({
-    startLocation: trip1.startLocation,
-    endLocation: trip2.endLocation,
-    startDate: trip1.startDate,
-    endDate: trip2.endDate,
+    startLocation: firstTrip.startLocation,
+    endLocation: lastTrip.endLocation,
+    startDate: firstTrip.startDate,
+    endDate: lastTrip.endDate,
     tripNotes: mergedTripNotes,
   });
 
   await mergedTrip.save();
 
+  const tripIds = trips.map((trip) => trip._id);
   await Trip.updateMany(
-    { _id: { $in: [trip1._id, trip2._id] } },
-    { replacedByTripId: mergedTrip._id }
+    { _id: { $in: tripIds } },
+    { replacedByTripId: mergedTrip._id },
+    { markAsDeleted: true }
   );
   return mergedTrip;
 }

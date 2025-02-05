@@ -45,6 +45,11 @@ const tripSchema = new mongoose.Schema({
     type: Number,
     required: false,
   },
+  markAsDeleted: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   tripCategory: {
     type: String,
     enum: ["business", "commute", "private"],

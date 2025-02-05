@@ -42,6 +42,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-size: 1.5rem;
+  color: #aeb8be;
 }
 
 #person-icon {
@@ -98,34 +100,29 @@ body {
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  width: 100%; /* Add this */
+  width: 100%;
 }
 
-/* Floating Labels */
 .form-floating-line {
   position: relative;
   margin-bottom: 2rem;
 }
 
-/* Platzhalter-Text ausblenden */
 .form-control-line-select option[disabled][hidden] {
   display: none;
 }
 
-/* Optionen normale Farbe */
 .form-control-line-select option {
   color: #000;
   background: white;
 }
 
-/* Fokus-State für Select */
 .form-control-line-select:valid + label {
   transform: translateY(-1.5rem);
   font-size: 0.8rem;
   opacity: 0.8;
 }
 
-/* Nur für das Kategorie-Dropdown */
 .form-floating-line.has-dropdown::after {
   content: "▼";
   position: absolute;
@@ -171,7 +168,6 @@ body {
   opacity: 0.8;
 }
 
-/* Zentrierte Felder */
 .form-control-line-center {
   border: none;
   border-bottom: 1px solid #ccc;
@@ -199,7 +195,6 @@ body {
   border-bottom-color: #0d6efd;
 }
 
-/* Notizen Feld */
 .form-floating-note textarea {
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -216,19 +211,19 @@ body {
 
 #gridContainer {
   flex: 1;
-  max-width: none; /* Override Bootstrap's container max-width */
-  width: auto; /* Remove default container width */
-  padding: 0; /* Remove default container padding */
-  margin: 0; /* Remove default container margins */
+  max-width: none;
+  width: auto;
+  padding: 0;
+  margin: 0;
 }
 
 #newTripForm {
   width: 40%;
   display: none;
-  background: white; /* Optional for better visibility */
+  background: white;
   padding: 1rem;
   border-radius: 0.5rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 .resized-grid {
   width: 40% !important;
@@ -290,6 +285,10 @@ body {
   color: #aeb8be;
   font-size: 1.5rem;
   text-decoration: none;
+}
+
+.sidebar a:hover {
+  color: white;
 }
 
 #errorMsg {

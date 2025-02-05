@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 const WebUser = require("../models/webUser");
 
 async function loadUser(req, res, next) {
-  if (req.authenticatedByApiKey) {
+  if (
+    req.isAuthenticatedByAnyKey ||
+    req.isAdminAuthenticated ||
+    req.isDriverAuthenticated
+  ) {
     console.log("getWebUser: Skipping session check for API key");
     return next();
   }

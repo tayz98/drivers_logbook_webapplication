@@ -17,12 +17,12 @@ const logger = createLogger({
   transports: [
     // Access log file (info and above)
     new transports.File({
-      filename: path.join(__dirname, "logs", "access.log"),
+      filename: path.join(__dirname, "..", "logs", "access.log"),
       level: "info",
     }),
     // Error log file (error and above)
     new transports.File({
-      filename: path.join(__dirname, "logs", "error.log"),
+      filename: path.join(__dirname, "..", "logs", "error.log"),
       level: "error",
     }),
     // Console log (for development)

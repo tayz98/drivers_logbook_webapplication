@@ -32,7 +32,6 @@ function authenticateDriverApiKey(req, res, next) {
 }
 function authenticateSessionOrApiKey(req, res, next) {
   if (req.session && req.session.user) {
-    req.authenticatedBySession = true;
     return next();
   }
 
@@ -41,22 +40,23 @@ function authenticateSessionOrApiKey(req, res, next) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  if (apiKey === ADMIN_API_KEY) {
-    req.adminAuthenticated = true;
-  } else if (apiKey === DRIVER_API_KEY) {
-    req.driverAuthenticated = true;
-  } else {
+  if (apiKey !== ADMIN_API_KEY && apiKey !== DRIVER_API_KEY) {
     return res.status(403).json({ message: "Invalid API key" });
   }
-
-  req.authenticatedByApiKey = true;
+  if (apiKey === ADMIN_API_KEY) {
+    req.isAdminAuthenticated = true;
+  } else {
+    req.isDriverAuthenticated = true;
+  }
+  req.isAuthenticatedByAnyKey = true;
   next();
 }
 function authenticateAnyApiKey(req, res, next) {
   const apiKey = req.headers["x-api-key"];
   if (!apiKey) {
-    return res.status(401).json({ message: "API key is missing" });
+    return res.status(401).json({ message: "Unauthorized" });
   }
+
   if (apiKey !== ADMIN_API_KEY && apiKey !== DRIVER_API_KEY) {
     return res.status(403).json({ message: "Invalid API key" });
   }

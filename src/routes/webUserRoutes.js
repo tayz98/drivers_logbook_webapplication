@@ -4,7 +4,6 @@ const User = require("../models/webUser");
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;
 
-const jwt = require("jsonwebtoken");
 const {
   authenticateAdminApiKey,
 } = require("../services/authenticationService");
@@ -14,7 +13,7 @@ const { loadUser } = require("../middleware/userMiddleware");
 require("dotenv").config();
 
 // getting all users
-router.get("/users", authenticateAdminApiKey, async (req, res) => {
+router.get("/api/users", authenticateAdminApiKey, async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -23,35 +22,38 @@ router.get("/users", authenticateAdminApiKey, async (req, res) => {
   }
 });
 
-// getting one user by id
-router.get("/user/:id", authenticateAdminApiKey, loadUser, async (req, res) => {
-  res.json(res.user);
-});
+// returns the session user
+router.get("/api/user/session", (req, res) => {
+  console.log("GET /user/session route hit");
 
-router.get("/user", async (req, res) => {
-  if (req.session && req.session.user) {
-    return res.json({
-      firstName: req.session.user.firstName,
-      lastName: req.session.user.lastName,
-      webUserId: req.session.user._id,
-    });
-  }
-  return res.status(401).json({ message: "Not authorized" });
-});
-
-router.get("/session-info", (req, res) => {
-  if (req.session && req.session.cookie) {
+  if (req.session && req.session.user && req.session.cookie) {
     const expireTimestamp = Date.now() + req.session.cookie.maxAge;
-    res.json({
-      expireTimestamp,
+    return res.json({
+      user: {
+        firstName: req.session.user.firstName,
+        lastName: req.session.user.lastName,
+        webUserId: req.session.user._id,
+      },
+      session: {
+        expireTimestamp,
+      },
     });
-  } else {
-    res.status(401).json({ error: "Not logged in" });
   }
+  return res.status(401).json({ message: "Unauthorized User-Session" });
 });
+
+//getting one user by id
+router.get(
+  "/api/user/:id",
+  authenticateAdminApiKey,
+  loadUser,
+  async (req, res) => {
+    res.json(res.user);
+  }
+);
 
 // creating a user
-router.post("/user", authenticateAdminApiKey, async (req, res) => {
+router.post("/api/user", authenticateAdminApiKey, async (req, res) => {
   const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
   const user = new User({
     username: req.body.username,
@@ -70,7 +72,7 @@ router.post("/user", authenticateAdminApiKey, async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
   try {
     if (!username || !password) {
@@ -103,7 +105,7 @@ router.post("/login", async (req, res) => {
 });
 
 // delete cookie when logging out
-router.post("/logout", (req, res) => {
+router.post("/api/logout", (req, res) => {
   console.log("Logout called");
   req.session.destroy((err) => {
     if (err) {
@@ -121,7 +123,7 @@ router.post("/logout", (req, res) => {
 });
 
 // updating one user by id e.g. changing password
-router.patch("/user/:id", loadUser, async (req, res) => {
+router.patch("/api/user/:id", loadUser, async (req, res) => {
   if (req.body.username != null) {
     res.user.username = req.body.username;
   }
@@ -146,7 +148,7 @@ router.patch("/user/:id", loadUser, async (req, res) => {
 });
 
 router.delete(
-  "/user/:id",
+  "/api/user/:id",
   loadUser,
   authenticateAdminApiKey,
   async (req, res) => {
@@ -158,21 +160,5 @@ router.delete(
     }
   }
 );
-
-// // middleware
-// async function getUser(req, res, next) {
-//   let user;
-//   try {
-//     user = await User.findById(req.params.id);
-//     if (user == null) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-//   } catch (error) {
-//     return res.status(500).json({ message: error.message });
-//   }
-
-//   res.user = user;
-//   next();
-// }
 
 module.exports = router;

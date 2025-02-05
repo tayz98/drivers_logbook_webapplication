@@ -6,11 +6,6 @@ const vehicleRoutes = require("./vehicleRoutes");
 const userRoutes = require("./webUserRoutes");
 const router = express.Router();
 
-// router.use("/", staticRoutes);
-// router.use("/", logRoutes);
-// router.use("/", tripRoutes);
-// router.use("/", vehicleRoutes);
-// router.use("/", userRoutes);
 router.use(staticRoutes);
 router.use(logRoutes);
 router.use(tripRoutes);

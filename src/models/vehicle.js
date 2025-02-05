@@ -12,21 +12,21 @@ const vehicleSchema = new mongoose.Schema({
   },
   manufacturer: {
     type: String,
-    required: true,
+    required: false,
   },
   model: {
     type: String,
-    required: true,
+    required: false,
   },
   year: {
     type: Number,
-    required: true,
-  },
-  // TODO: probably remove this field
-  make: {
-    type: String,
     required: false,
   },
+  // TODO: field not supported yet
+  // make: {
+  //   type: String,
+  //   required: false,
+  // },
   licensePlate: {
     type: String,
     required: false,
