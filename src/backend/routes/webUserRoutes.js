@@ -10,7 +10,6 @@ const {
 const { create } = require("../models/vehicle");
 const webUser = require("../models/webUser");
 const { loadUser } = require("../middleware/userMiddleware");
-require("dotenv").config();
 
 // getting all users
 router.get("/api/users", authenticateAdminApiKey, async (req, res) => {

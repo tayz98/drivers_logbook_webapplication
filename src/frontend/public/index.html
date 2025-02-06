@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaCorp - Anmeldung</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="/css/base.css" rel="stylesheet" />
+    <link href="/css/index.css" rel="stylesheet" />
+  </head>
+  <body class="custom-body">
+    <header class="custom-header fixed-top">
+      <div class="container-fluid d-flex align-items-center">
+        <span class="brand">NovaCorp</span>
+      </div>
+    </header>
+    <div class="container">
+      <div
+        class="flex-grow-1 d-flex justify-content-center align-items-center min-vh-100"
+      >
+        <div id="errorMsg" class="w-100 mb-3"></div>
+        <div class="card shadow p-4 custom-card">
+          <h3 class="text-center mb-3">Anmeldung</h3>
+
+          <form id="loginForm">
+            <div class="mb-3">
+              <label for="username" class="form-label">Benutzername</label>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                placeholder="Benutzernamen eingeben"
+                required
+              />
+            </div>
+            <div class="mb-3 position-relative">
+              <label for="password" class="form-label">Passwort</label>
+              <div class="input-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  placeholder="Passwort eingeben"
+                  required
+                />
+                <span
+                  id="togglePassword"
+                  class="input-group-text"
+                  style="cursor: pointer"
+                >
+                  <i class="bi bi-eye" style="font-size: 1.5rem"></i>
+                </span>
+              </div>
+            </div>
+            <div class="hint-container d-flex justify-content-end mb-3">
+              <small
+                class="text-muted custom-hint"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Bitte kontaktieren Sie die IT-Abteilung, um ihr Passwort zurücksetzen zu lassen"
+              >
+                Password vergessen?
+              </small>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary w-100 custom-login-button"
+            >
+              Bestätigen
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="http://localhost:1516/livereload.js?snipver=1"></script>
+    <script src="/scripts/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/indexPageScript.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", login);
+    </script>
+  </body>
+</html>

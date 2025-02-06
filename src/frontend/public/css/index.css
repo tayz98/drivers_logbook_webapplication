@@ -1,0 +1,47 @@
+.custom-card {
+  color: #aeb8be;
+  width: 15%;
+  max-width: 500px;
+  min-width: 300px;
+  background-color: white;
+}
+
+.custom-card * {
+  color: black;
+}
+
+.hint-container {
+  margin-bottom: 0.5rem !important;
+}
+
+.custom-hint {
+  opacity: 0.7;
+}
+
+.custom-login-button {
+  background-color: #4790fc;
+  font-weight: 500;
+}
+
+#errorMsg {
+  position: fixed;
+  top: 90px;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  padding: 0 1rem;
+}
+
+#togglePassword {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+
+  z-index: 10;
+}

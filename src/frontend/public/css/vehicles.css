@@ -1,0 +1,24 @@
+.compact-card {
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  width: 250px;
+  transition: all 0.2s ease;
+}
+
+.compact-card .card-header {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.compact-info dt {
+  margin-bottom: 0.1rem;
+}
+
+.compact-info dd {
+  margin-bottom: 0.3rem;
+}
+
+.compact-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+}

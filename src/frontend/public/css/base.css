@@ -23,27 +23,11 @@ body {
   font-family: "Open Sans", sans-serif;
 }
 
-.custom-card {
-  color: #aeb8be;
-  width: 15%;
-  max-width: 500px;
-  min-width: 300px;
-  background-color: white;
-}
-
 .nav-link {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0 0 1.5rem 0;
-}
-
-.name-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 1.5rem;
-  color: #aeb8be;
 }
 
 #person-icon {
@@ -53,28 +37,6 @@ body {
 .bi {
   color: #aeb8be;
   font-size: 2rem;
-}
-
-.custom-card * {
-  color: black;
-}
-
-.date-row {
-  height: fit-content !important;
-}
-
-#togglePassword {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-
-  z-index: 10;
 }
 
 .form-control {
@@ -90,17 +52,6 @@ body {
   margin-left: calc(250px + 1rem);
   margin-right: 1rem;
   padding: 1rem;
-}
-
-.button-container {
-  text-align: left;
-}
-
-.grid-form-container {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  width: 100%;
 }
 
 .form-floating-line {
@@ -209,14 +160,6 @@ body {
   box-shadow: none;
 }
 
-#gridContainer {
-  flex: 1;
-  max-width: none;
-  width: auto;
-  padding: 0;
-  margin: 0;
-}
-
 .tripForm {
   width: 100%;
   display: flex;
@@ -252,44 +195,6 @@ body {
   color: #6c757d;
 }
 
-.resized-grid {
-  width: 40% !important;
-  margin-left: 0 !important;
-  margin-right: auto !important;
-  justify-content: start !important;
-}
-
-#editTripForm {
-  width: 40%;
-}
-.my-button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border: none;
-  background-color: #4790fc;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.my-button:hover {
-  background-color: #357ad1;
-}
-
-.custom-login-button {
-  background-color: #4790fc;
-  font-weight: 500;
-}
-
-.hint-container {
-  margin-bottom: 0.5rem !important;
-}
-
-.custom-hint {
-  opacity: 0.7;
-}
-
 .sidebar {
   position: fixed;
   top: var(--header-height);
@@ -321,15 +226,6 @@ body {
   color: white;
 }
 
-#errorMsg {
-  position: fixed;
-  top: 90px;
-  left: 0;
-  right: 0;
-  z-index: 1100;
-  padding: 0 1rem;
-}
-
 .sidebar-footer {
   position: absolute;
   bottom: 1rem;
@@ -354,6 +250,12 @@ body {
     min-width: 200px;
     max-width: 250px;
   }
+}
+
+@font-face {
+  font-family: "bootstrap-icons";
+  src: url("../fonts/bootstrap-icons.woff2") format("woff2"),
+    url("../fonts/bootstrap-icons.woff") format("woff");
 }
 
 @font-face {

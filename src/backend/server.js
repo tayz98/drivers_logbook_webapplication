@@ -11,9 +11,10 @@ const externalPort = 1516;
 const session = require("express-session");
 const app = express();
 const port = process.env.PORT || 80;
-const db = require("./mongodb");
 const MongoStore = require("connect-mongo");
 const { mongo, default: mongoose } = require("mongoose");
+const { isAuthenticated } = require("./services/authenticationService");
+require("dotenv").config({ path: path.join(__dirname, "..", "..", ".env") });
 
 // Middleware
 app.use(express.json());
@@ -22,10 +23,11 @@ app.use(
     origin: function (origin, callback) {
       const allowedOrigins = [
         "http://localhost",
-        "http://localhost:80",
-        "http://localhost:1516",
+        `http://localhost:${port}`,
+        `http://localhost:${externalPort}`,
         "http://novacorp-fahrtenbuch.ipv64.net",
-        "http://novacorp-fahrtenbuch.ipv64.net:1516",
+        `http://novacorp-fahrtenbuch.ipv64.net:${port}`,
+        `http://novacorp-fahrtenbuch.ipv64.net:${externalPort}`,
       ];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -67,7 +69,7 @@ app.use((req, res, next) => {
 const liveReloadServer = livereload.createServer({
   host: externalDomain,
   port: externalPort,
-  extraExts: ["html", "css", "js", "ejs"],
+  extraExts: ["html", "css", "js"],
   delay: 500,
 });
 
@@ -86,15 +88,21 @@ liveReloadServer.server.on("connection", (socket) => {
   });
 });
 
-liveReloadServer.watch(path.join(__dirname, "public"));
-liveReloadServer.watch(path.join(__dirname, "protected"));
+liveReloadServer.watch(path.join(__dirname, "..", "frontend", "public"));
+liveReloadServer.watch(path.join(__dirname, "..", "frontend", "protected"));
 
 app.use(express.urlencoded({ extended: true }));
 
 // Mount Routes
 app.use("/", routes);
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "..", "frontend", "public")));
+
+app.use(
+  "/protected",
+  isAuthenticated,
+  express.static(path.join(__dirname, "..", "frontend", "protected"))
+);
 
 // // Error Middleware
 app.use(errorMiddleware);

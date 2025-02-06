@@ -1,4 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({
+  path: require("path").join(__dirname, "..", "..", ".env"),
+});
 
 const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;

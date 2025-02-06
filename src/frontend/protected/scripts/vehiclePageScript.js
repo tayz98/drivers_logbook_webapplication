@@ -1,46 +1,6 @@
 // FETCH METHODS:
 
-// load vehicles
-async function loadVehicles() {
-  try {
-    const response = await fetch("/api/vehicles", {
-      method: "GET",
-      credentials: "include",
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const vehicles = await response.json();
-    console.log("Vehicles received:", vehicles);
-    displayVehicles(vehicles);
-  } catch (error) {
-    console.error("Error fetching vehicles:", error);
-  }
-}
-
 // update a vehicle used with the edit button
-async function updateVehicle(vehicleId, data) {
-  try {
-    const response = await fetch(`/api/vehicle/${vehicleId}`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP-Fehler! Status: ${response.status}`);
-    }
-
-    const updatedVehicle = await response.json();
-    console.log("Fahrzeug aktualisiert:", updatedVehicle);
-    return updatedVehicle;
-  } catch (error) {
-    console.error("Fehler beim Aktualisieren des Fahrzeugs:", error);
-  }
-}
 
 // edit form
 document.addEventListener("DOMContentLoaded", () => {
@@ -249,31 +209,13 @@ document.addEventListener("DOMContentLoaded", function () {
       tripStatus: "completed",
       detourNote: document.getElementById("detour").value,
     };
-
-    try {
-      const response = await fetch("/api/trip", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error posting trip:", errorData);
-        return;
-      }
-
-      const result = await response.json();
-      console.log("Trip created:", result);
-      tripFormToClose.reset();
-      const modalElement = document.getElementById("newTripModal");
-      const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-      modalInstance.hide();
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    createVehicle(formData);
+    const result = await response.json();
+    console.log("Trip created:", result);
+    tripFormToClose.reset();
+    const modalElement = document.getElementById("newTripModal");
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modalInstance.hide();
   });
 });
 

@@ -1,5 +1,5 @@
 /node_modules
-src/logs/
+src/backend/logs/
 src/middleware/logs/*
 src/middleware/logs
 .env
