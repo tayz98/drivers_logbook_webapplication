@@ -68,7 +68,6 @@
 
       <!-- GRID AND FORM CONTAINER -->
       <div class="grid-form-container">
-
       <!-- GRID -->
       <div class="my-3" id="gridContainer">
         <div class="mb-2">
@@ -114,8 +113,90 @@
           </div>
         </div>
         </div>
-        
+          <form class="tripForm" id="editTripForm" style="display: none;">
+            <h3 style="text-align: center; margin-bottom: 20px;" id="vehicleName">Fahrzeug:</h3>
+
+            <div class="row g-4">
+              <input
+                type="hidden"
+                id="vehicleVin"
+                name="vehicleVin"
+                value=""
+              />
+
+              <div class="col-md-6">
+                <div class="form-floating-line has-dropdown">
+                  <select id="category" class="form-control-line-select">
+                    <option value="" selected disabled>
+                      Bitte auswählen...
+                    </option>
+                    <option value="business">Dienstlich</option>
+                    <option value="private">Privat</option>
+                    <option value="commute">Arbeitsweg</option>
+                  </select>
+                  <label for="category">Kategorie</label>
+                </div>
+                <div class="form-floating-line">
+                  <input
+                    type="text"
+                    id="purpose"
+                    class="form-control-line"
+                    placeholder=" "
+                  />
+                  <label for="purpose">Anlass</label>
+                </div>
+                </div>
+              <div class="col-md-6">
+                <div class="form-floating-line">
+                  <input
+                    type="text"
+                    id="client"
+                    class="form-control-line"
+                    placeholder=" "
+                  />
+                  <label for="client">Firma</label>
+                </div>
+                <div class="form-floating-line">
+                  <input
+                    type="text"
+                    id="businessPartner"
+                    class="form-control-line"
+                    placeholder=" "
+                  />
+                  <label for="businessPartner">Geschäftspartner</label>
+                </div>
+              </div>
+
+              
+              <div class="col-12">
+                <div class="form-floating-line text-center">
+                  <input
+                    type="text"
+                    id="detour"
+                    class="form-control-line-center"
+                    placeholder=" "
+                  />
+                  <label for="detour">Gefahrener Umweg</label>
+                </div>
+                <div class="form-floating-note text-center">
+                  <textarea
+                    id="notes"
+                    class="form-control"
+                    placeholder="Notizen"
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary">
+                  Fahrt speichern
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
+      </div>
       </div>
     </main>
     <script src="/scripts/script.js"></script>

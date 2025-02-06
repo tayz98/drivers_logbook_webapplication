@@ -217,14 +217,41 @@ body {
   margin: 0;
 }
 
-#newTripForm {
-  width: 40%;
-  display: none;
+.tripForm {
+  width: 100%;
+  display: flex;
   background: white;
   padding: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+.tripForm input:disabled,
+.tripForm select:disabled,
+.tripForm textarea:disabled {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.section-heading {
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+.tripForm select.form-control-line-select:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.form-floating-line:has(:disabled) label {
+  color: #6c757d;
+}
+
 .resized-grid {
   width: 40% !important;
   margin-left: 0 !important;
@@ -232,6 +259,9 @@ body {
   justify-content: start !important;
 }
 
+#editTripForm {
+  width: 40%;
+}
 .my-button {
   padding: 0.5rem 1rem;
   font-size: 1rem;

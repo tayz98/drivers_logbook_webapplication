@@ -20,7 +20,6 @@
         <span class="brand">NovaCorp</span>
       </div>
     </header>
-    <!-- SIDEBAR -->
     <nav class="sidebar">
       <ul class="nav flex-column">
         <li class="nav-item">
@@ -63,66 +62,12 @@
       </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-content p-3">
       <div class="container-fluid">
-        <div class="row g-3" id="vehicleContainer">
-          <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm mb-2 compact-card">
-              <div
-                class="card-header py-1 px-2 d-flex justify-content-between align-items-center bg-primary text-white"
-              >
-                <h6 class="mb-0 small">Audi A4 Limo</h6>
-                <div>
-                  <button
-                    class="btn btn-link p-0 text-white add-trip-button"
-                    title="Fahrt hinzufügen"
-                  >
-                    <i class="bi bi-plus-circle fs-6"></i>
-                  </button>
-                  <button
-                    class="btn btn-link p-0 text-white edit-button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editVehicleModal"
-                    title="Bearbeiten"
-                  >
-                    <i class="bi bi-pencil-square fs-6"></i>
-                  </button>
-                  <a
-                    href="#"
-                    class="text-white ms-1 search-button"
-                    title="Fahrten anzeigen"
-                  >
-                    <i class="bi bi-search fs-6"></i>
-                  </a>
-                </div>
-              </div>
-
-              <div class="card-body p-2">
-                <dl class="row mb-0 compact-info">
-                  <dt class="col-5 small text-muted">VIN:</dt>
-                  <dd class="col-7 small vin">WAUZZZ8TZBA123456</dd>
-
-                  <dt class="col-5 small text-muted">Hersteller:</dt>
-                  <dd class="col-7 small">Audi</dd>
-
-                  <dt class="col-5 small text-muted">Jahr:</dt>
-                  <dd class="col-7 small">2023</dd>
-
-                  <dt class="col-5 small text-muted">Herkunft:</dt>
-                  <dd class="col-7 small">DE</dd>
-
-                  <dt class="col-5 small text-muted">Kennzeichen:</dt>
-                  <dd class="col-7 small">80339</dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="row g-3" id="vehicleContainer"></div>
       </div>
     </main>
 
-    <!-- Modal: Neue Fahrt hinzufügen -->
     <div
       class="modal fade"
       id="newTripModal"
@@ -134,7 +79,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="newTripModalLabel">
-              Neue Fahrt hinzufügen
+              Neue Fahrt hinzufügen für Fahrzeug: <span id="vehicleName"></span>
             </h5>
             <button
               type="button"
@@ -144,27 +89,27 @@
             ></button>
           </div>
           <div class="modal-body">
-            <button
-              type="button"
-              class="btn btn-outline-dark d-flex align-items-center my-1"
-              id="addTripBtn"
-            >
-              <i class="bi bi-plus" style="font-size: 1.5rem"></i>
-              <span style="font-weight: bold">Neue Fahrt hinzufügen</span>
-            </button>
-            <div id="newTripForm">
+            <div class="tripForm" id="newTripForm">
               <form>
                 <div class="row g-4">
-                  <!-- Linke Spalte -->
+                  <input
+                    type="hidden"
+                    id="vehicleVin"
+                    name="vehicleVin"
+                    value=""
+                  />
+
                   <div class="col-md-6">
-                    <div class="form-floating-line">
-                      <input
-                        type="text"
-                        id="businessPartner"
-                        class="form-control-line"
-                        placeholder=" "
-                      />
-                      <label for="businessPartner">Geschäftspartner</label>
+                    <div class="form-floating-line has-dropdown">
+                      <select id="category" class="form-control-line-select">
+                        <option value="" selected disabled>
+                          Bitte auswählen...
+                        </option>
+                        <option value="business">Dienstlich</option>
+                        <option value="private">Privat</option>
+                        <option value="commute">Arbeitsweg</option>
+                      </select>
+                      <label for="category">Kategorie</label>
                     </div>
                     <div class="form-floating-line">
                       <input
@@ -175,9 +120,49 @@
                       />
                       <label for="purpose">Anlass</label>
                     </div>
+
+                    <div class="text-center">
+                      <h6 class="section-heading">Start</h6>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-floating-line">
+                          <input
+                            type="text"
+                            id="startStreet"
+                            class="form-control-line"
+                            placeholder=" "
+                          />
+                          <label for="startStreet">Straße</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-floating-line">
+                          <input
+                            type="text"
+                            id="startCity"
+                            class="form-control-line"
+                            placeholder=" "
+                          />
+                          <label for="startCity">Stadt</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-floating-line">
+                          <input
+                            type="text"
+                            id="startPostalCode"
+                            class="form-control-line"
+                            placeholder=" "
+                          />
+                          <label for="startPostalCode">Postleitzahl</label>
+                        </div>
+                      </div>
+                    </div>
+
                     <div class="form-floating-line">
                       <input
-                        type="text"
+                        type="number"
                         id="mileage"
                         class="form-control-line"
                         placeholder=" "
@@ -186,16 +171,16 @@
                     </div>
                     <div class="form-floating-line">
                       <input
-                        type="text"
-                        id="startLocation"
+                        type="datetime-local"
+                        id="startTimestamp"
                         class="form-control-line"
-                        placeholder=" "
+                        step="60"
+                        required
                       />
-                      <label for="startLocation">Start</label>
+                      <label for="startTimestamp">Startzeit</label>
                     </div>
                   </div>
 
-                  <!-- Rechte Spalte -->
                   <div class="col-md-6">
                     <div class="form-floating-line">
                       <input
@@ -206,20 +191,58 @@
                       />
                       <label for="client">Firma</label>
                     </div>
-                    <div class="form-floating-line has-dropdown">
-                      <select id="category" class="form-control-line-select">
-                        <option value="" selected disabled>
-                          Bitte auswählen...
-                        </option>
-                        <option value="dienstlich">Dienstlich</option>
-                        <option value="privat">Privat</option>
-                        <option value="arbeitsweg">Arbeitsweg</option>
-                      </select>
-                      <label for="category">Kategorie</label>
-                    </div>
                     <div class="form-floating-line">
                       <input
                         type="text"
+                        id="businessPartner"
+                        class="form-control-line"
+                        placeholder=" "
+                      />
+                      <label for="businessPartner">Geschäftspartner</label>
+                    </div>
+
+                    <div class="text-center">
+                      <h6 class="section-heading">Ankunft</h6>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-floating-line">
+                          <input
+                            type="text"
+                            id="endStreet"
+                            class="form-control-line"
+                            placeholder=" "
+                          />
+                          <label for="endStreet">Straße</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-floating-line">
+                          <input
+                            type="text"
+                            id="endCity"
+                            class="form-control-line"
+                            placeholder=" "
+                          />
+                          <label for="endCity">Stadt</label>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-floating-line">
+                          <input
+                            type="text"
+                            id="endPostalCode"
+                            class="form-control-line"
+                            placeholder=" "
+                          />
+                          <label for="endPostalCode">Postleitzahl</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-floating-line">
+                      <input
+                        type="number"
                         id="mileageEnd"
                         class="form-control-line"
                         placeholder=" "
@@ -228,16 +251,16 @@
                     </div>
                     <div class="form-floating-line">
                       <input
-                        type="text"
-                        id="endLocation"
+                        type="datetime-local"
+                        id="endTimestamp"
                         class="form-control-line"
-                        placeholder=" "
+                        step="60"
+                        required
                       />
-                      <label for="endLocation">Ziel</label>
+                      <label for="endTimestamp">Endzeit</label>
                     </div>
                   </div>
 
-                  <!-- Untere Felder -->
                   <div class="col-12">
                     <div class="form-floating-line text-center">
                       <input
@@ -306,7 +329,6 @@
                   />
                 </dd>
 
-                <!-- Hersteller -->
                 <dt class="col-5 small text-muted">Hersteller:</dt>
                 <dd class="col-7 small">
                   <input
@@ -316,7 +338,6 @@
                   />
                 </dd>
 
-                <!-- Modell -->
                 <dt class="col-5 small text-muted">Modell:</dt>
                 <dd class="col-7 small">
                   <input
@@ -326,7 +347,6 @@
                   />
                 </dd>
 
-                <!-- Jahr -->
                 <dt class="col-5 small text-muted">Jahr:</dt>
                 <dd class="col-7 small">
                   <input
@@ -336,7 +356,6 @@
                   />
                 </dd>
 
-                <!-- Kennzeichen -->
                 <dt class="col-5 small text-muted">Kennzeichen:</dt>
                 <dd class="col-7 small">
                   <input
@@ -389,7 +408,7 @@
     </style>
     <script src="/scripts/script.js"></script>
     <script src="/scripts/eventListener.js"></script>
-    <script src="/scripts/vehicles.js"></script>
+    <script src="/scripts/vehicle_script.js"></script>
     <script src="/scripts/util.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", loadUserAndSessionInfo);

@@ -1,3 +1,5 @@
+let countdownIntervalId = null;
+
 async function loadUserAndSessionInfo() {
   try {
     const response = await fetch("/api/user/session", {
@@ -26,6 +28,10 @@ async function loadUserAndSessionInfo() {
 function startCountdown(expireTimestamp) {
   const timerElement = document.getElementById("session-timer");
 
+  if (countdownIntervalId) {
+    clearInterval(countdownIntervalId);
+  }
+
   function updateTimer() {
     const now = Date.now();
     let diff = Math.max(expireTimestamp - now, 0);
@@ -36,12 +42,11 @@ function startCountdown(expireTimestamp) {
       String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
 
     if (diff <= 0) {
-      clearInterval(intervalId);
+      clearInterval(countdownIntervalId);
       timerElement.textContent = "00:00";
     }
   }
 
   updateTimer();
-
-  const intervalId = setInterval(updateTimer, 1000);
+  countdownIntervalId = setInterval(updateTimer, 1000);
 }

@@ -11,6 +11,9 @@ const externalPort = 1516;
 const session = require("express-session");
 const app = express();
 const port = process.env.PORT || 80;
+const db = require("./mongodb");
+const MongoStore = require("connect-mongo");
+const { mongo, default: mongoose } = require("mongoose");
 
 // Middleware
 app.use(express.json());
@@ -43,10 +46,11 @@ app.use(
 app.use(
   session({
     secret: "example",
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     rolling: true,
     sameSite: "Lax",
+    store: MongoStore.create({ client: mongoose.connection.getClient() }),
     cookie: {
       maxAge: 60000 * 30, // 30 minutes
       secure: false, // set to true when using https

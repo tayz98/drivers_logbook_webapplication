@@ -1,0 +1,344 @@
+// FETCH METHODS:
+
+// load vehicles
+async function loadVehicles() {
+  try {
+    const response = await fetch("/api/vehicles", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const vehicles = await response.json();
+    console.log("Vehicles received:", vehicles);
+    displayVehicles(vehicles);
+  } catch (error) {
+    console.error("Error fetching vehicles:", error);
+  }
+}
+
+// update a vehicle used with the edit button
+async function updateVehicle(vehicleId, data) {
+  try {
+    const response = await fetch(`/api/vehicle/${vehicleId}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+    }
+
+    const updatedVehicle = await response.json();
+    console.log("Fahrzeug aktualisiert:", updatedVehicle);
+    return updatedVehicle;
+  } catch (error) {
+    console.error("Fehler beim Aktualisieren des Fahrzeugs:", error);
+  }
+}
+
+// edit form
+document.addEventListener("DOMContentLoaded", () => {
+  const editForm = document.getElementById("editVehicleForm");
+
+  editForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const vehicleId = document.getElementById("vehicleId").textContent.trim();
+    const customName = document.getElementById("vehicleCustomName").value;
+
+    const manufacturer = document.getElementById("vehicleManufacturer").value;
+    const model = document.getElementById("vehicleModel").value;
+    const year = document.getElementById("vehicleYear").value;
+    const licensePlate = document.getElementById("vehicleLicensePlate").value;
+
+    const data = {
+      manufacturer,
+      customName,
+      model,
+      year,
+      licensePlate,
+    };
+
+    try {
+      // send patch request with updated data
+      await updateVehicle(vehicleId, data);
+
+      const updatedCard = document.querySelector(
+        `.compact-card[data-id="${vehicleId}"]`
+      );
+      // refresh the vehicle card with the updated data
+      if (updatedCard) {
+        updatedCard.dataset.customName = data.customName;
+        updatedCard.dataset.manufacturer = data.manufacturer;
+        updatedCard.dataset.model = data.model;
+        updatedCard.dataset.year = data.year;
+        updatedCard.dataset.licensePlate = data.licensePlate;
+
+        updatedCard.querySelector(".card-header h6").textContent =
+          data.customName;
+        updatedCard.querySelectorAll(".compact-info dd")[1].textContent =
+          data.manufacturer;
+        updatedCard.querySelectorAll(".compact-info dd")[2].textContent =
+          data.model;
+        updatedCard.querySelectorAll(".compact-info dd")[3].textContent =
+          data.year;
+        updatedCard.querySelectorAll(".compact-info dd")[4].textContent =
+          data.licensePlate;
+      }
+
+      const modalEl = document.getElementById("editVehicleModal");
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  // always let the user allow to edit these fields
+  const allowedFields = [
+    "mileage",
+    "mileageEnd",
+    "notes",
+    "category",
+    "startTimestamp",
+    "endTimestamp",
+    "vehicleVin",
+  ];
+
+  const categorySelect = document.getElementById("category");
+  categorySelect.addEventListener("change", function () {
+    const selectedValue = this.value.toLowerCase();
+    const shouldDisable =
+      selectedValue === "private" || selectedValue === "commute";
+    const formElements = document.querySelectorAll(
+      "#newTripForm input, #newTripForm textarea"
+    );
+
+    // enable or disable fields based on the selected category
+    formElements.forEach((element) => {
+      if (allowedFields.includes(element.id)) {
+        element.disabled = false;
+      } else {
+        element.disabled = shouldDisable;
+        if (shouldDisable) {
+          element.value = "";
+        }
+      }
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const tripForm = document.getElementById("newTripForm");
+  const tripFormToClose = tripForm.querySelector("form");
+  const submitButton = tripForm.querySelector('button[type="submit"]');
+  const formFields = tripForm.querySelectorAll("input, textarea, select");
+
+  // fields that are optional and don't need to be filled out
+  const optionalFields = ["notes", "detour", "vehicleVin"];
+
+  function validateForm() {
+    let valid = true;
+
+    formFields.forEach((field) => {
+      if (!field.disabled && field.tagName.toLowerCase() !== "button") {
+        if (optionalFields.includes(field.id)) {
+          return;
+        }
+        if (field.value.trim() === "") {
+          valid = false;
+        }
+      }
+    });
+    submitButton.disabled = !valid;
+
+    if (!valid) {
+      submitButton.classList.add("disabled");
+    } else {
+      submitButton.classList.remove("disabled");
+    }
+  }
+
+  formFields.forEach((field) => {
+    field.addEventListener("input", validateForm);
+    field.addEventListener("change", validateForm);
+    field.addEventListener("blur", validateForm);
+  });
+
+  validateForm();
+
+  tripForm.addEventListener("submit", async function (e) {
+    e.preventDefault(); // Prevent the default form submission
+    const startTimestamp = document.getElementById("startTimestamp").value;
+    const startDate = new Date(startTimestamp);
+    startDate.setSeconds(0, 0);
+    const endTimestamp = document.getElementById("endTimestamp").value;
+    const endDate = new Date(endTimestamp);
+    endDate.setSeconds(0, 0);
+    let startLocation = null;
+    let endLocation = null;
+    let startStreet = document.getElementById("startStreet").value.trim();
+    if (startStreet === "") {
+      startStreet = null;
+    }
+    let startCity = document.getElementById("startCity").value.trim();
+    if (startCity === "") {
+      startCity = null;
+    }
+    let startPostalCode = document
+      .getElementById("startPostalCode")
+      .value.trim();
+    if (startPostalCode === "") {
+      startPostalCode = null;
+    }
+    let endStreet = document.getElementById("endStreet").value.trim();
+    if (endStreet === "") {
+      endStreet = null;
+    }
+    let endCity = document.getElementById("endCity").value.trim();
+    if (endCity === "") {
+      endCity = null;
+    }
+    let endPostalCode = document.getElementById("endPostalCode").value.trim();
+    if (endPostalCode === "") {
+      endPostalCode = null;
+    }
+    const vin = document.getElementById("vehicleVin").value.trim();
+
+    if (startStreet && startCity && startPostalCode) {
+      startLocation = {
+        street: startStreet,
+        city: startCity,
+        postalCode: startPostalCode,
+      };
+    }
+    if (endStreet && endCity && endPostalCode) {
+      endLocation = {
+        street: endStreet,
+        city: endCity,
+        postalCode: endPostalCode,
+      };
+    }
+
+    // Gather form data into an object
+    const formData = {
+      startTimestamp: startDate,
+      endTimestamp: endDate,
+      startLocation: startLocation,
+      endLocation: endLocation,
+      startMileage: document.getElementById("mileage").value,
+      endMileage: document.getElementById("mileageEnd").value,
+      client: document.getElementById("businessPartner").value,
+      clientCompany: document.getElementById("client").value,
+      tripPurpose: document.getElementById("purpose").value,
+      tripCategory: document.getElementById("category").value,
+      tripNotes: document.getElementById("notes").value,
+      vehicle: {
+        vin: vin,
+      },
+      recorded: false,
+      tripCategory: document.getElementById("category").value,
+      tripStatus: "completed",
+      detourNote: document.getElementById("detour").value,
+    };
+
+    try {
+      const response = await fetch("/api/trip", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error posting trip:", errorData);
+        return;
+      }
+
+      const result = await response.json();
+      console.log("Trip created:", result);
+      tripFormToClose.reset();
+      const modalElement = document.getElementById("newTripModal");
+      const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+      modalInstance.hide();
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  });
+});
+
+async function displayVehicles(vehicles) {
+  const container = document.getElementById("vehicleContainer");
+  container.innerHTML = "";
+
+  vehicles.forEach((vehicle) => {
+    console.log(vehicle);
+
+    container.innerHTML += `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="card shadow-sm mb-2 compact-card"
+             data-id="${vehicle._id}"
+             data-custom-name="${vehicle.customName ?? "Unbekannt"}"
+             data-manufacturer="${vehicle.manufacturer ?? "Unbekannt"}"
+             data-model="${vehicle.model ?? "Unbekannt"}"
+             data-year="${vehicle.year ?? "Unbekannt"}"
+            data-license-plate="${vehicle.licensePlate ?? "Unbekannt"}">
+          <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center bg-primary text-white">
+            <h6 class="mb-0 small">${vehicle.customName ?? "Unbekannt"}</h6>
+            <div>
+                              <button
+                    class="btn btn-link p-0 text-white add-trip-button"
+                    title="Fahrt hinzufügen"
+                  >
+                    <i class="bi bi-plus-circle fs-6"></i>
+                  </button>
+              <button
+                class="btn btn-link p-0 text-white edit-button"
+                data-bs-toggle="modal"
+                data-bs-target="#editVehicleModal"
+                title="Bearbeiten"
+              >
+                <i class="bi bi-pencil-square fs-6"></i>
+              </button>
+              <a href="#" class="text-white ms-1 search-button" title="Fahrten anzeigen">
+                <i class="bi bi-search fs-6"></i>
+              </a>
+            </div>
+          </div>
+          <div class="card-body p-2">
+            <dl class="row mb-0 compact-info">
+              <dt class="col-5 small text-muted">VIN:</dt>
+              <dd class="col-7 small vin">${vehicle._id}</dd>
+
+              <dt class="col-5 small text-muted">Hersteller:</dt>
+              <dd class="col-7 small">${
+                vehicle.manufacturer ?? "Unbekannt"
+              }</dd>
+
+              <dt class="col-5 small text-muted">Modell:</dt>
+              <dd class="col-7 small">${vehicle.model ?? "Unbekannt"}</dd>
+
+              <dt class="col-5 small text-muted">Jahr:</dt>
+              <dd class="col-7 small">${vehicle.year ?? "Unbekannt"}</dd>
+              
+              <dt class="col-5 small text-muted">Kennzeichen:</dt>
+              <dd class="col-7 small">${
+                vehicle.licensePlate ?? "Unbekannt"
+              }</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}

@@ -27,7 +27,15 @@ router.get("/api/user/session", (req, res) => {
   console.log("GET /user/session route hit");
 
   if (req.session && req.session.user && req.session.cookie) {
-    const expireTimestamp = Date.now() + req.session.cookie.maxAge;
+    let expireTimestamp;
+    if (req.session.cookie.expires) {
+      console.log("test");
+      expireTimestamp = req.session.cookie.expires.getTime();
+    } else {
+      console.log("test2");
+      expireTimestamp = Date.now() + req.session.cookie.maxAge;
+    }
+
     return res.json({
       user: {
         firstName: req.session.user.firstName,

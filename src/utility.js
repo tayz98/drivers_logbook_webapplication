@@ -1,4 +1,8 @@
-const formatDate = (date) => {
+const formatDate = (dateInput) => {
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) {
+    throw new Error("Invalid date provided to formatDate");
+  }
   const pad = (num) => String(num).padStart(2, "0");
   const day = pad(date.getDate());
   const month = pad(date.getMonth() + 1);
@@ -7,7 +11,7 @@ const formatDate = (date) => {
   const minutes = pad(date.getMinutes());
   const seconds = pad(date.getSeconds());
 
-  return `${day}.${month}.${year} | ${hours}:${minutes}:${seconds}`;
+  return `${day}.${month}.${year} um ${hours}:${minutes}:${seconds} Uhr`;
 };
 
 // only needed when we want to calculate the distance between two locations based on their coordinates

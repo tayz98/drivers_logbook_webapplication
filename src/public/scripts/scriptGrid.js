@@ -80,6 +80,8 @@ function displayTrips(trips) {
     const tripRow = document.createElement("div");
     tripRow.className =
       "row trip-row border bg-white rounded fixed-height mb-2";
+    tripRow.dataset.tripId = trip._id;
+    tripRow.dataset.vehicleId = trip.vehicleId;
     tripRow.innerHTML = `
           <div class="col-auto d-flex align-items-center">
             <div class="form-check">
@@ -114,10 +116,34 @@ function displayTrips(trips) {
             <i class="bi bi-briefcase"></i>
           </div>
         `;
-
     container.appendChild(tripRow);
   });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const allowedFields = ["notes", "category", "tripId"];
+  const categorySelect = document.getElementById("category");
+  categorySelect.addEventListener("change", function () {
+    const selectedValue = this.value.toLowerCase();
+    const shouldDisable =
+      selectedValue === "private" || selectedValue === "commute";
+    const formElements = document.querySelectorAll(
+      "#editTripForm input, #newTripForm textarea"
+    );
+
+    // enable or disable fields based on the selected category
+    formElements.forEach((element) => {
+      if (allowedFields.includes(element.id)) {
+        element.disabled = false;
+      } else {
+        element.disabled = shouldDisable;
+        if (shouldDisable) {
+          element.value = "";
+        }
+      }
+    });
+  });
+});
 
 function calculateDistance(trip) {
   if (!trip.startMileage || !trip.endMileage) {

@@ -92,14 +92,15 @@ async function getTrip(req, res, next) {
 }
 
 // creating a trip
+// TODO: think about how to assign a trip without a vehicle to a vehicle
 router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
   const timestamp = formatDate(new Date().toLocaleString());
   console.log(req.body);
   let vehicleId;
-  if (req.body.vehicle) {
+  if (req.body.vehicle && req.body.vehicle.vin !== "") {
     const vehicleData = req.body.vehicle;
     try {
-      let vehicle = await Vehicle.findOne({ _id: vehicleData.vin });
+      let vehicle = await Vehicle.find({ _id: vehicleData.vin });
       if (!vehicle) {
         vehicle = new Vehicle({
           _id: vehicleData.vin,
@@ -135,7 +136,7 @@ router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
   });
   if (req.body.recorded === false) {
     trip.tripNotes.push(
-      `Die Fahrt konnte aufgrund technischer Probleme nicht aufgezeichnet werden und wurde am ${timestamp} nachgetragen.`
+      `Die Fahrt wurde aufgrund eines technischen Ausfalls nicht aufgezeichnet und am ${timestamp} nachgetragen.`
     );
   }
   try {
