@@ -208,9 +208,6 @@ body {
   z-index: 1040;
 }
 
-.selected-row {
-  outline: 2px solid blue !important;
-}
 .fixed-height {
   height: 70px;
   overflow: hidden;

@@ -15,7 +15,6 @@ const {
   authenticateSessionOrApiKey,
 } = require("../services/authenticationService");
 
-// TODO: check if some IO events are missing
 router.get(
   "/api/trips",
   authenticateSessionOrApiKey,
@@ -68,7 +67,7 @@ router.get(
 
       const trips = await Trip.find(query);
 
-      res.json(trips);
+      return res.json(trips);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -76,22 +75,27 @@ router.get(
 );
 
 // getting one trip by id
-router.get("/trip/:id", getTrip, authenticateAdminApiKey, async (req, res) => {
-  res.json(res.trip);
-});
+router.get(
+  "/api/trip/:id",
+  getTrip,
+  authenticateSessionOrApiKey,
+  async (req, res) => {
+    return res.json(res.trip);
+  }
+);
 
 // middleware
 async function getTrip(req, res, next) {
   let trip;
   try {
-    trip = Trip.findById(req.params.id);
-    if (trip == null) {
+    trip = await Trip.find({ _id: req.params.id });
+    if (trip == null || trip.length === 0) {
       return res.status(404).json({ message: "Trip not found!" });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-  res.trip = trip;
+  res.trip = trip[0];
   next();
 }
 
@@ -154,55 +158,79 @@ router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
 });
 
 // updating one trip by id
-router.patch("/api/trip/:id", getTrip, async (req, res) => {
-  if (!req.authenticatedBySession && !req.authenticatedByApiKey) {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-  if (!isTripEditableWithinSevenDays(res.trip)) {
-    return res.status(403).json({
-      message: "You are not allowed to edit trips older than 7 days!",
-    });
-  }
+router.patch(
+  "/api/trip/:id",
+  getTrip,
+  authenticateSessionOrApiKey,
+  async (req, res) => {
+    // console.log("Trip received in patch route:" + res.trip);
+    if (!isTripEditableWithinSevenDays(res.trip.startTimestamp)) {
+      return res.status(403).json({
+        message: "You are not allowed to edit trips older than 7 days!",
+      });
+    }
 
-  const timestamp = formatDate(new Date().toLocaleString());
+    const timestamp = formatDate(new Date().toLocaleString());
 
-  res.trip.checked = true;
+    res.trip.checked = true;
 
-  if (req.body.clientCompany != null) {
-    res.body.clientCompany = req.body.clientCompany;
+    if (req.body.tripNotes != null) {
+      if (!req.body.tripNotes.trim() === "") {
+        res.trip.tripNotes.push(
+          `${req.body.tripNotes} | Letzte Änderung: ${timestamp}`
+        );
+      }
+    }
+
+    if (req.body.clientCompany != null) {
+      res.trip.clientCompany = req.body.clientCompany;
+    }
+
+    if (req.body.client != null) {
+      res.trip.client = req.body.client;
+    }
+
+    if (req.body.detourNote != null) {
+      res.trip.detourNote = req.body.detourNote;
+    }
+
+    if (req.body.tripCategory != null) {
+      if (res.trip.tripCategory !== req.body.tripCategory) {
+        res.trip.tripNotes.push(
+          `Die Kategorie wurde am ${timestamp} von ${formatCategory(
+            res.trip.tripCategory
+          )} auf ${formatCategory(req.body.tripCategory)} korrigiert.`
+        );
+        res.trip.tripCategory = req.body.tripCategory;
+      }
+    }
+
+    if (req.body.tripPurpose != null) {
+      res.trip.tripPurpose = req.body.tripPurpose;
+    }
+
+    try {
+      const updatedTrip = await res.trip.save();
+      // getIO().emit("tripUpdated", updatedTrip);
+      getIO().emit("tripsUpdated", [updatedTrip]);
+      return res.json(updatedTrip);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
   }
+);
 
-  if (req.body.client != null) {
-    res.body.client = req.body.client;
+function formatCategory(category) {
+  if (category === "business") {
+    return "Dienstlich";
+  } else if (category === "private") {
+    return "Privat";
+  } else if (category === "commute") {
+    return "Arbeitsweg";
+  } else {
+    return "Unbekannt";
   }
-
-  if (req.body.detourNote != null) {
-    res.trip.detourNote = req.body.detourNote;
-  }
-
-  if (req.body.tripCategory != null) {
-    res.trip.tripNotes.push(
-      `Die Kategorie wurde am ${timestamp} von *${res.body.tripCategory}* auf *${req.body.tripCategory}* korrigiert.`
-    );
-    res.trip.tripCategory = req.body.tripCategory;
-  }
-
-  if (req.body.tripPurpose != null) {
-    res.tripPurpose = req.body.tripPurpose;
-  }
-
-  if (req.body.tripNotes != null) {
-    res.trip.tripNotes.push(`${req.body.tripNotes} | (${timestamp})`);
-  }
-
-  try {
-    const updatedTrip = await res.trip.save();
-    getIO().emit("tripUpdated", updatedTrip);
-    res.json(updatedTrip);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+}
 
 // delete multiple trips at once
 router.delete(
@@ -214,7 +242,7 @@ router.delete(
       if (req.isAdminAuthenticated) {
         await Trip.deleteMany();
         getIO().emit("tripsDeleted");
-        res.json({ message: "All trips deleted from database" });
+        return res.json({ message: "All trips deleted from database" });
       } else if (res.trips) {
         for (let trip of res.trips) {
           trip.markAsDeleted = true;
@@ -222,7 +250,7 @@ router.delete(
         }
         const tripIds = res.trips.map((trip) => trip._id);
         getIO().emit("tripsMarkedAsDeleted", tripIds);
-        res.json({ message: "Trips marked as deleted" });
+        return res.json({ message: "Trips marked as deleted" });
       }
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -240,10 +268,11 @@ router.delete(
       if (req.isAdminAuthenticated) {
         await res.trip.deleteOne();
         getIO().emit("tripDeleted", res.trip._id);
-        res.json({ message: "Trip deleted from database" });
+        return res.json({ message: "Trip deleted from database" });
       } else {
         res.trip.markAsDeleted = true;
-        res.json({ message: "Trip marked as deleted" });
+        getIO().emit("tripsMarkedAsDeleted", [res.trip._id]);
+        return res.json({ message: "Trip marked as deleted" });
       }
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -257,7 +286,7 @@ async function getAllTrips(req, res, next) {
   try {
     const tripIds = req.body.tripIds;
     if (!tripIds) {
-      next();
+      return res.status(400).json({ message: "No trip ids provided." });
     }
     const trips = await Trip.find({ _id: { $in: tripIds } });
 
@@ -272,6 +301,7 @@ async function getAllTrips(req, res, next) {
   }
 }
 
+// TODO:
 router.post("/api/trips/merge", getAllTrips, async (req, res) => {
   try {
     const trips = res.trips;
@@ -302,22 +332,36 @@ router.get("/api/trips/range", async (req, res) => {
     // Validate query parameters if needed
 
     const trips = await getTripsWithinPeriod(fromDate, toDate);
-    res.json(trips);
+    return res.json(trips);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-function isTripEditableWithinSevenDays(trip) {
-  const today = new Date();
-  let tripDate = trip.startTimestamp;
-
-  const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-  const diffInMs = today.getTime() - tripDate.getTime();
-  if (diffInMs > sevenDaysInMs) {
-    return false; // older than 7 days
+function isTripEditableWithinSevenDays(timestamp) {
+  if (!timestamp) {
+    console.log("Trip has no start timestamp");
+    return false;
   }
-  return true; // within 7 days
+  console.log("Checking if trip is editable within 7 days");
+  const today = new Date();
+  let tripDate = new Date(timestamp);
+
+  if (isNaN(tripDate.getTime())) {
+    console.log("Trip start timestamp is not a valid date");
+    return false;
+  }
+
+  // for test purposes change to 30 days
+  const sevenDaysInMs = 30 * 24 * 60 * 60 * 1000;
+  console.log("sevenDaysInMs:", sevenDaysInMs); // Log 7 days in milliseconds
+
+  const diffInMs = today.getTime() - tripDate.getTime();
+  console.log("diffInMs:", diffInMs); // Log the time difference
+
+  const isEditable = diffInMs <= sevenDaysInMs;
+  console.log("isEditable:", isEditable); // Log the final boolean result
+  return isEditable;
 }
 
 module.exports = router;

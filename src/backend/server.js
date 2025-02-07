@@ -47,21 +47,21 @@ app.use(
   })
 );
 
-app.use(
-  session({
-    secret: "example",
-    resave: true,
-    saveUninitialized: false,
-    rolling: true,
-    sameSite: "Lax",
-    store: MongoStore.create({ client: mongoose.connection.getClient() }),
-    cookie: {
-      maxAge: 60000 * 30, // 30 minutes
-      secure: false, // set to true when using https
-      httpOnly: false, // prevents manipulation in browser, set to true in production
-    },
-  })
-);
+const sessionMiddleware = session({
+  secret: "example",
+  resave: true,
+  saveUninitialized: false,
+  rolling: true,
+  sameSite: "Lax",
+  store: MongoStore.create({ client: mongoose.connection.getClient() }),
+  cookie: {
+    maxAge: 60000 * 30, // 30 minutes
+    secure: false, // set to true when using https
+    httpOnly: false, // prevents manipulation in browser, set to true in production
+  },
+});
+
+app.use(sessionMiddleware);
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
@@ -100,6 +100,9 @@ app.use(errorMiddleware);
 const httpServer = http.createServer(app);
 const socket = require("./websocket");
 const io = socket.init(httpServer);
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next);
+});
 
 // Mount Routes
 app.use("/", routes);

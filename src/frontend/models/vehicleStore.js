@@ -22,8 +22,8 @@ class VehicleStore {
       this.socket.emit("vehiclesRequested");
     });
 
-    this.socket.on("vehiclesUpdated", (vehicles) => {
-      console.log("Vehicles updated:", vehicles);
+    this.socket.on("vehicles", (vehicles) => {
+      console.log("Received vehicles from server:", vehicles);
       this.vehicles = vehicles;
     });
 

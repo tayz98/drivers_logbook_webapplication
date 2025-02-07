@@ -125,6 +125,26 @@ async function updateVehicle(vehicleId, data) {
 /*
 --- Trip Methods ---
 */
+
+async function fetchTrip(tripId) {
+  try {
+    const response = await fetch(`/api/trip/${tripId}`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const trip = await response.json();
+    return trip;
+  } catch (error) {
+    console.error("Error fetching trip:", error);
+    return null;
+  }
+}
+
 async function fetchTrips() {
   try {
     const vehicleId = getVehicleIdFromUrl();
@@ -148,6 +168,30 @@ async function fetchTrips() {
     displayTrips(trips);
   } catch (error) {
     console.error("Error fetching trips:", error);
+  }
+}
+
+async function updateTrip(tripId, formData) {
+  console.log("FormData in Json:");
+  console.log(JSON.stringify(formData));
+  try {
+    const response = await fetch(`/api/trip/${tripId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error updating trip:", errorData);
+      return;
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Error:", error);
   }
 }
 

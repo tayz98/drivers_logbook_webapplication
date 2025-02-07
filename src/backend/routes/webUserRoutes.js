@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/webUser");
+const User = require("../models/webUserSchema");
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;
 
@@ -99,6 +99,8 @@ router.post("/api/login", async (req, res) => {
       username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
+      role: user.role,
+      vehicleId: user.vehicleId,
     };
     console.log("Session set: ", req.session);
 

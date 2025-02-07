@@ -118,10 +118,12 @@
                 name="vehicleVin"
                 value=""
               />
+              <input type="hidden" id="tripId", name="tripId" value="" />
+
 
               <div class="col-md-6">
                 <div class="form-floating-line has-dropdown">
-                  <select id="category" class="form-control-line-select">
+                  <select id="category" name="tripCategory" class="form-control-line-select">
                     <option value="" selected disabled>
                       Bitte auswählen...
                     </option>
@@ -136,6 +138,7 @@
                     type="text"
                     id="purpose"
                     class="form-control-line"
+                    name="tripPurpose"
                     placeholder=" "
                   />
                   <label for="purpose">Anlass</label>
@@ -146,6 +149,7 @@
                   <input
                     type="text"
                     id="client"
+                    name="client"
                     class="form-control-line"
                     placeholder=" "
                   />
@@ -155,6 +159,7 @@
                   <input
                     type="text"
                     id="businessPartner"
+                    name="businessPartner"
                     class="form-control-line"
                     placeholder=" "
                   />
@@ -168,19 +173,24 @@
                   <input
                     type="text"
                     id="detour"
+                    name="detour"
                     class="form-control-line-center"
                     placeholder=" "
                   />
                   <label for="detour">Gefahrener Umweg</label>
                 </div>
+                <div class="col-13">
                 <div class="form-floating-note text-center">
                   <textarea
                     id="notes"
+                    name="notes"
                     class="form-control"
                     placeholder="Notizen"
                     rows="3"
                   ></textarea>
                 </div>
+                <div id="tripNotesDisplay">  </div> 
+              </div>
               </div>
 
               <div class="col-12 text-center">
@@ -194,6 +204,24 @@
       </div>
       </div>
     </main>
+    <!-- Action Modal -->
+<div class="modal fade" id="actionModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Aktion bestätigen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalBody"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+        <button type="button" class="btn btn-primary" id="modalActionButton">Bestätigen</button>
+      </div>
+    </div>
+  </div>
+</div>
     <script src="/scripts/mobx.umd.production.min.js"></script>
     <script src="/scripts/socket.io.min.js"></script>
     <script src="/scripts/bootstrap.bundle.min.js"></script>
@@ -203,7 +231,6 @@
     <script src="/protected/scripts/dashboardPageScript.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", fetchUserAndSessionInfo);
-      document.addEventListener("DOMContentLoaded", tripStore.loadTrips);
     </script>
     <script src="http://localhost:1516/livereload.js?snipver=1"></script>    
   </body>

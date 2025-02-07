@@ -1,4 +1,4 @@
-const Vehicle = require("../models/vehicle");
+const Vehicle = require("../models/vehicleSchema");
 const express = require("express");
 const router = express.Router();
 const {
@@ -7,12 +7,10 @@ const {
   authenticateSessionOrApiKey,
 } = require("../services/authenticationService");
 const { loadUser } = require("../middleware/userMiddleware");
-const WebUser = require("../models/webUser");
+const WebUser = require("../models/webUserSchema");
 const { getIO } = require("../websocket");
 
 // getting all vehicles
-
-// TODO: add missing IO events
 router.get(
   "/api/vehicles",
   authenticateSessionOrApiKey,
@@ -65,9 +63,14 @@ router.get(
 );
 
 // getting one vehicle by id
-router.get("/api/vehicle/:id", getVehicle, async (req, res) => {
-  res.json(res.vehicle);
-});
+router.get(
+  "/api/vehicle/:id",
+  getVehicle,
+  authenticateSessionOrApiKey,
+  async (req, res) => {
+    res.json(res.vehicle);
+  }
+);
 
 // creating a vehicle
 router.post("/api/vehicle", async (req, res) => {
@@ -128,16 +131,31 @@ router.patch(
   }
 );
 
-// deleting one vehicle by id
-router.delete("/api/vehicle/:id", getVehicle, async (req, res) => {
+// delete all vehicle from the database
+router.delete("/api/vehicles", authenticateAdminApiKey, async (req, res) => {
   try {
-    await res.vehicle.deleteOne();
-    getIO().emit("vehicleDeleted", { vehicleId: req.params.id });
-    res.json({ message: "Vehicle deleted" });
+    await Vehicle.deleteMany();
+    res.json({ message: "All vehicles deleted from database" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
+// deleting one vehicle by id
+router.delete(
+  "/api/vehicle/:id",
+  authenticateAdminApiKey,
+  getVehicle,
+  async (req, res) => {
+    try {
+      await res.vehicle.deleteOne();
+      getIO().emit("vehicleDeleted", { vehicleId: req.params.id });
+      res.json({ message: "Vehicle deleted" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 // middleware
 async function getVehicle(req, res, next) {

@@ -1,6 +1,30 @@
 const Trip = require("../models/tripSchema");
 const formatDate = require("../utility");
 
+function buildTripQuery(userRole, user) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const query = {
+    startTimestamp: { $gte: thirtyDaysAgo },
+    $or: [{ markAsDeleted: false }, { markAsDeleted: { $exists: false } }],
+  };
+
+  switch (userRole) {
+    case "dispatcher":
+      query.tripCategory = "business";
+      break;
+    case "manager":
+      query.vehicleId = user.vehicleId;
+      break;
+    case "admin":
+      break;
+    default:
+      console.error("Unknown user role:", userRole);
+      break;
+  }
+
+  return query;
+}
+
 async function mergeTrips(trips) {
   const timestamp = formatDate(new Date());
 
@@ -130,4 +154,4 @@ async function getTripsWithinPeriod(fromDateStr, toDateStr) {
   return tripsForExport;
 }
 
-module.exports = { mergeTrips };
+module.exports = { mergeTrips, buildTripQuery, getTripsWithinPeriod };

@@ -40,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  // always let the user allow to edit these fields
   const allowedFields = [
     "mileage",
     "mileageEnd",
@@ -165,8 +164,6 @@ document.addEventListener("DOMContentLoaded", function () {
         postalCode: endPostalCode,
       };
     }
-
-    // Gather form data into an object
     const formData = {
       startTimestamp: startDate,
       endTimestamp: endDate,
@@ -186,8 +183,9 @@ document.addEventListener("DOMContentLoaded", function () {
       tripCategory: document.getElementById("category").value,
       tripStatus: "completed",
       detourNote: document.getElementById("detour").value,
+      checked: true,
     };
-    postTrip(formData);
+    const response = await postTrip(formData);
     const result = await response.json();
     console.log("Trip created:", result);
     tripFormToClose.reset();

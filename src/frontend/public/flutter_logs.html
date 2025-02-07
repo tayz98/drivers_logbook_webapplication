@@ -160,7 +160,7 @@
       const eventSource = new EventSource("/stream_flutter_logs");
 
       let allLogs = [];
-      let autoScroll = true; // Flag to track if auto-scrolling is enabled
+      let autoScroll = true; 
 
       eventSource.onopen = () => {
         console.log("Connection to /flutter_logs opened.");

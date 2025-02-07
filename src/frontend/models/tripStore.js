@@ -15,17 +15,29 @@ class TripStore {
       this.socket.emit("tripsRequested");
     });
 
-    this.socket.on("tripsUpdated", (trips) => {
-      console.log("Trips updated:", trips);
+    this.socket.on("trips", (trips) => {
+      console.log("Received trips from server:", trips);
       this.trips = trips;
     });
 
-    this.socket.on("tripUpdated", (updatedTrip) => {
-      console.log("Trip updated:", updatedTrip);
-      const index = this.trips.findIndex((t) => t._id === updatedTrip._id);
-      if (index !== -1) {
-        this.trips[index] = updatedTrip;
-      }
+    // this.socket.on("tripUpdated", (updatedTrip) => {
+    //   console.log("Trip updated:", updatedTrip);
+    //   const index = this.trips.findIndex((t) => t._id === updatedTrip._id);
+    //   if (index !== -1) {
+    //     this.trips[index] = updatedTrip;
+    //   }
+    // });
+
+    this.socket.on("tripsUpdated", (updatedTrips) => {
+      console.log("Trips updated:", updatedTrips);
+      updatedTrips.forEach((updatedTrip) => {
+        const index = this.trips.findIndex(
+          (trip) => trip._id === updatedTrip._id
+        );
+        if (index !== -1) {
+          this.trips[index] = updatedTrip;
+        }
+      });
     });
 
     this.socket.on("tripCreated", (newTrip) => {
@@ -43,14 +55,14 @@ class TripStore {
       });
     });
 
-    this.socket.on("tripsDeleted", () => {
-      console.log("Trips deleted event received");
-      this.trips = [];
-    });
-
     this.socket.on("tripDeleted", (tripId) => {
       console.log("Trip deleted event received:", tripId);
       this.trips = this.trips.filter((trip) => trip._id !== tripId);
+    });
+
+    this.socket.on("tripsDeleted", () => {
+      console.log("Trips deleted event received");
+      this.trips = [];
     });
   }
 
@@ -64,5 +76,29 @@ class TripStore {
       console.error("Fehler beim Laden der Fahrten:", error);
     }
   }
+  getTripById(tripId) {
+    const tripIdNumber = Number(tripId);
+    return this.trips.find((trip) => trip._id === tripIdNumber);
+  }
+
+  //   logAllTrips() {
+  //     console.log("All trips (array):", this.trips); // Log the entire trips array
+
+  //     if (this.trips && Array.isArray(this.trips)) {
+  //       // Check if trips is an array and not null/undefined
+  //       this.trips.forEach((trip, index) => {
+  //         console.log(`--- Trip object at index ${index} ---`);
+  //         console.log("Trip _id:", trip._id); // Log the _id of each trip object
+  //         console.log("All properties of trip:", trip); // Log all properties of each trip object
+  //         // You can add more specific properties you want to check here, e.g.,
+  //         // console.log("Trip startTimestamp:", trip.startTimestamp);
+  //         // console.log("Trip tripCategory:", trip.tripCategory);
+  //       });
+  //     } else {
+  //       console.log("this.trips is not an array or is empty.");
+  //     }
+  //   }
+  // }
 }
+
 const tripStore = new TripStore();
