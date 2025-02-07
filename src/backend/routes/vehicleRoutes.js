@@ -8,9 +8,11 @@ const {
 } = require("../services/authenticationService");
 const { loadUser } = require("../middleware/userMiddleware");
 const WebUser = require("../models/webUser");
+const { getIO } = require("../websocket");
 
 // getting all vehicles
 
+// TODO: add missing IO events
 router.get(
   "/api/vehicles",
   authenticateSessionOrApiKey,
@@ -84,6 +86,7 @@ router.post("/api/vehicle", async (req, res) => {
   });
   try {
     const newVehicle = await vehicle.save();
+    getIO().emit("vehicleCreated", newVehicle);
     res.status(201).json(newVehicle);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -117,6 +120,7 @@ router.patch(
     }
     try {
       const updatedVehicle = await res.vehicle.save();
+      getIO().emit("vehicleUpdated", updatedVehicle);
       res.json(updatedVehicle);
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -128,6 +132,7 @@ router.patch(
 router.delete("/api/vehicle/:id", getVehicle, async (req, res) => {
   try {
     await res.vehicle.deleteOne();
+    getIO().emit("vehicleDeleted", { vehicleId: req.params.id });
     res.json({ message: "Vehicle deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });

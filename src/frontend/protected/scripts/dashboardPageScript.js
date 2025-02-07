@@ -1,12 +1,22 @@
+const timeOptions = {
+  weekday: "long",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+};
+
 function displayTrips(trips) {
   const container = document.getElementById("gridContainer");
   container.innerHTML = "";
 
-  trips.sort((a, b) => new Date(a.startTimestamp) - new Date(b.startTimestamp));
+  // trips.sort((a, b) => new Date(a.startTimestamp) - new Date(b.startTimestamp));
+  const sortedTrips = trips
+    .slice()
+    .sort((a, b) => new Date(a.startTimestamp) - new Date(b.startTimestamp));
 
   let lastDate = null;
-
-  trips.forEach((trip) => {
+  sortedTrips.forEach((trip) => {
+    // trips.forEach((trip) => {
     const startAddress = formattedAddress(trip.startLocation);
     const endAddress = formattedAddress(trip.endLocation);
     const tripDate = new Date(trip.startTimestamp).toLocaleDateString();
@@ -15,7 +25,7 @@ function displayTrips(trips) {
       lastDate = tripDate;
       const formattedDate = new Date(trip.startTimestamp).toLocaleDateString(
         "de-DE",
-        options
+        timeOptions
       );
       const dateRow = document.createElement("div");
 
@@ -119,3 +129,8 @@ function calculateDistance(trip) {
 function formattedAddress(location) {
   return `${location.street}, ${location.postalCode} ${location.city}`;
 }
+
+autorun(() => {
+  console.log("Vehicles changed:", tripStore.trips);
+  displayTrips(tripStore.trips);
+});

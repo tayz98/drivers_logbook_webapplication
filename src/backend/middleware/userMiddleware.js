@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const WebUser = require("../models/webUser");
+const WebUser = require("../models/webUserSchema");
 
 async function loadUser(req, res, next) {
   if (

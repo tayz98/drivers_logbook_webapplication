@@ -60,7 +60,7 @@ async function handleTripRowClick(clickedRow) {
     // Load vehicle name and update the modal
     const vehicleId = clickedRow.dataset.vehicleId;
     const vehicleNameElement = document.getElementById("vehicleName");
-    const vehicleName = await loadVehicleName(vehicleId);
+    const vehicleName = await fetchVehicleName(vehicleId);
     if (vehicleNameElement) {
       vehicleNameElement.innerText = "Fahrzeug: " + vehicleName;
     }

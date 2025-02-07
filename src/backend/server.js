@@ -14,21 +14,25 @@ const port = process.env.PORT || 80;
 const MongoStore = require("connect-mongo");
 const { mongo, default: mongoose } = require("mongoose");
 const { isAuthenticated } = require("./services/authenticationService");
+const http = require("http");
+
 require("dotenv").config({ path: path.join(__dirname, "..", "..", ".env") });
+
+const allowedOrigins = [
+  "http://localhost",
+  "http://localhost:3000",
+  `http://localhost:${port}`,
+  `http://localhost:${externalPort}`,
+  "http://novacorp-fahrtenbuch.ipv64.net",
+  `http://novacorp-fahrtenbuch.ipv64.net:${port}`,
+  `http://novacorp-fahrtenbuch.ipv64.net:${externalPort}`,
+];
 
 // Middleware
 app.use(express.json());
 app.use(
   cors({
     origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost",
-        `http://localhost:${port}`,
-        `http://localhost:${externalPort}`,
-        "http://novacorp-fahrtenbuch.ipv64.net",
-        `http://novacorp-fahrtenbuch.ipv64.net:${port}`,
-        `http://novacorp-fahrtenbuch.ipv64.net:${externalPort}`,
-      ];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -42,8 +46,6 @@ app.use(
     credentials: true,
   })
 );
-
-// app.use(cors());
 
 app.use(
   session({
@@ -90,25 +92,33 @@ liveReloadServer.server.on("connection", (socket) => {
 
 liveReloadServer.watch(path.join(__dirname, "..", "frontend", "public"));
 liveReloadServer.watch(path.join(__dirname, "..", "frontend", "protected"));
+liveReloadServer.watch(path.join(__dirname, "..", "frontend", "models"));
 
-app.use(express.urlencoded({ extended: true }));
+// // Error Middleware
+app.use(errorMiddleware);
+
+const httpServer = http.createServer(app);
+const socket = require("./websocket");
+const io = socket.init(httpServer);
 
 // Mount Routes
 app.use("/", routes);
-
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "..", "frontend", "public")));
-
 app.use(
   "/protected",
   isAuthenticated,
   express.static(path.join(__dirname, "..", "frontend", "protected"))
 );
-
-// // Error Middleware
-app.use(errorMiddleware);
+app.use(
+  "/models",
+  isAuthenticated,
+  express.static(path.join(__dirname, "..", "frontend", "models"))
+);
 
 // Start Server
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Server running at http://${externalDomain}:${port}`);
-  console.log(`LiveReload active on http://${externalDomain}:${externalPort}`);
+httpServer.listen(port, "0.0.0.0", () => {
+  console.log(`Server running on port ${port}`);
 });
+
+module.exports = { httpServer, io };

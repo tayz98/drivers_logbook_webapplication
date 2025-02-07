@@ -7,8 +7,6 @@ const saltRounds = 10;
 const {
   authenticateAdminApiKey,
 } = require("../services/authenticationService");
-const { create } = require("../models/vehicle");
-const webUser = require("../models/webUser");
 const { loadUser } = require("../middleware/userMiddleware");
 
 // getting all users

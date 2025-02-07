@@ -194,13 +194,16 @@
       </div>
       </div>
     </main>
+    <script src="/scripts/mobx.umd.production.min.js"></script>
+    <script src="/scripts/socket.io.min.js"></script>
     <script src="/scripts/bootstrap.bundle.min.js"></script>
     <script src="/protected/scripts/fetching.js"></script>
+    <script src="/models/tripStore.js"></script>
     <script src="/protected/scripts/handleClicks.js"></script>
     <script src="/protected/scripts/dashboardPageScript.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", loadUserAndSessionInfo);
-      document.addEventListener("DOMContentLoaded", loadTrips);
+      document.addEventListener("DOMContentLoaded", fetchUserAndSessionInfo);
+      document.addEventListener("DOMContentLoaded", tripStore.loadTrips);
     </script>
     <script src="http://localhost:1516/livereload.js?snipver=1"></script>    
   </body>

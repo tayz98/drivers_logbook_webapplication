@@ -1,8 +1,12 @@
-const Trip = require("../models/trip");
+const Trip = require("../models/tripSchema");
 const formatDate = require("../utility");
 
 async function mergeTrips(trips) {
   const timestamp = formatDate(new Date());
+
+  if (trips.length < 2) {
+    throw new Error("At least two trips are required to merge.");
+  }
 
   const mergedTripNotes = trips.reduce((acc, trip) => {
     return acc.concat(trip.tripNotes);

@@ -3,8 +3,6 @@ src/backend/logs/
 src/middleware/logs/*
 src/middleware/logs
 .env
-/src/routes/routes.rest
 *.rest
-src/routes/routes.rest
 *.log
 */logs

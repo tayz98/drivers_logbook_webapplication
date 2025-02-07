@@ -1,7 +1,3 @@
-// FETCH METHODS:
-
-// update a vehicle used with the edit button
-
 // edit form
 document.addEventListener("DOMContentLoaded", () => {
   const editForm = document.getElementById("editVehicleForm");
@@ -26,35 +22,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
-      // send patch request with updated data
-      await updateVehicle(vehicleId, data);
-
-      const updatedCard = document.querySelector(
-        `.compact-card[data-id="${vehicleId}"]`
-      );
-      // refresh the vehicle card with the updated data
-      if (updatedCard) {
-        updatedCard.dataset.customName = data.customName;
-        updatedCard.dataset.manufacturer = data.manufacturer;
-        updatedCard.dataset.model = data.model;
-        updatedCard.dataset.year = data.year;
-        updatedCard.dataset.licensePlate = data.licensePlate;
-
-        updatedCard.querySelector(".card-header h6").textContent =
-          data.customName;
-        updatedCard.querySelectorAll(".compact-info dd")[1].textContent =
-          data.manufacturer;
-        updatedCard.querySelectorAll(".compact-info dd")[2].textContent =
-          data.model;
-        updatedCard.querySelectorAll(".compact-info dd")[3].textContent =
-          data.year;
-        updatedCard.querySelectorAll(".compact-info dd")[4].textContent =
-          data.licensePlate;
-      }
-
+      updateVehicle(vehicleId, data);
       const modalEl = document.getElementById("editVehicleModal");
       const modalInstance = bootstrap.Modal.getInstance(modalEl);
-      if (modalInstance) modalInstance.hide();
+      if (modalInstance) {
+        modalInstance.hide();
+
+        const modalBackdrop = document.querySelector(".modal-backdrop");
+        if (modalBackdrop) {
+          modalBackdrop.remove();
+        }
+      }
     } catch (error) {
       console.error("Update failed:", error);
     }
@@ -209,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
       tripStatus: "completed",
       detourNote: document.getElementById("detour").value,
     };
-    createVehicle(formData);
+    postTrip(formData);
     const result = await response.json();
     console.log("Trip created:", result);
     tripFormToClose.reset();
@@ -284,3 +262,8 @@ async function displayVehicles(vehicles) {
     `;
   });
 }
+
+autorun(() => {
+  console.log("Vehicles changed:", vehicleStore.vehicles);
+  displayVehicles(vehicleStore.vehicles);
+});

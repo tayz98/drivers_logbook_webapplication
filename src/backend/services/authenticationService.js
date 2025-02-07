@@ -1,5 +1,5 @@
 require("dotenv").config({
-  path: require("path").join(__dirname, "..", "..", ".env"),
+  path: require("path").join(__dirname, "..", "..", "..", ".env"),
 });
 
 const SECRET_KEY = process.env.ACCESS_TOKEN_SECRET;
@@ -33,7 +33,10 @@ function authenticateDriverApiKey(req, res, next) {
   next();
 }
 function authenticateSessionOrApiKey(req, res, next) {
+  console.log("Authenticating session or API key");
   if (req.session && req.session.user) {
+    console.log("Session is authenticated");
+
     return next();
   }
 

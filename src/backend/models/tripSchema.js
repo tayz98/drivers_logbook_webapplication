@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const Vehicle = require("./vehicle");
-const locationSchema = require("./location");
+const Vehicle = require("./vehicleSchema");
+const locationSchema = require("./locationSchema");
 const AutoIncrement = require("mongoose-sequence")(mongoose);
-const Trip = require("./trip");
+const Trip = require("./tripSchema");
 
 const tripSchema = new mongoose.Schema({
   _id: {

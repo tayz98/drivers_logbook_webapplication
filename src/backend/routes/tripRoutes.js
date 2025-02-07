@@ -1,33 +1,37 @@
 const express = require("express");
 const router = express.Router();
-const Trip = require("../models/trip");
-const Vehicle = require("../models/vehicle");
+const Trip = require("../models/tripSchema");
+const Vehicle = require("../models/vehicleSchema");
 const { mergeTrips } = require("../services/tripService");
 const { formatDate } = require("../utility");
-const WebUser = require("../models/webUser");
+const WebUser = require("../models/webUserSchema");
 const mongoose = require("mongoose");
 const { loadUser } = require("../middleware/userMiddleware");
+const { getIO } = require("../websocket");
 
 const {
   authenticateAdminApiKey,
   authenticateDriverApiKey,
   authenticateSessionOrApiKey,
 } = require("../services/authenticationService");
-const vehicle = require("../models/vehicle");
 
-// getting all trips
+// TODO: check if some IO events are missing
 router.get(
   "/api/trips",
   authenticateSessionOrApiKey,
   loadUser,
   async (req, res) => {
+    console.log("Getting all trips");
     try {
       const { vehicleId: queryVehicleId } = req.query;
       if (req.isAdminAuthenticated) {
-        // return all trips when using api key
+        console.log("Admin API Key Authentication successful");
+
         const trips = await Trip.find(
           queryVehicleId ? { vehicleId: queryVehicleId } : {}
         );
+        console.log("Trips fetched:", trips);
+
         return res.json(trips);
       }
 
@@ -91,8 +95,6 @@ async function getTrip(req, res, next) {
   next();
 }
 
-// creating a trip
-// TODO: think about how to assign a trip without a vehicle to a vehicle
 router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
   const timestamp = formatDate(new Date().toLocaleString());
   console.log(req.body);
@@ -109,6 +111,7 @@ router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
           region: vehicleData.region ?? "",
         });
         await vehicle.save();
+        getIO().emit("vehicleCreated", vehicle);
         console.log(`New vehicle created: ${vehicleData.vin}`);
       }
       vehicleId = vehicleData.vin;
@@ -141,6 +144,7 @@ router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
   }
   try {
     const newTrip = await trip.save();
+    getIO().emit("tripCreated", newTrip);
     res.status(201).json(newTrip);
     console.log("Trip created");
   } catch (error) {
@@ -162,7 +166,7 @@ router.patch("/api/trip/:id", getTrip, async (req, res) => {
 
   const timestamp = formatDate(new Date().toLocaleString());
 
-  res.trip.checked = true; // mark as checked
+  res.trip.checked = true;
 
   if (req.body.clientCompany != null) {
     res.body.clientCompany = req.body.clientCompany;
@@ -191,11 +195,9 @@ router.patch("/api/trip/:id", getTrip, async (req, res) => {
     res.trip.tripNotes.push(`${req.body.tripNotes} | (${timestamp})`);
   }
 
-  // not possible to change data that was recorded
-  // if needed, replace the current trip
-
   try {
     const updatedTrip = await res.trip.save();
+    getIO().emit("tripUpdated", updatedTrip);
     res.json(updatedTrip);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -203,14 +205,30 @@ router.patch("/api/trip/:id", getTrip, async (req, res) => {
 });
 
 // delete multiple trips at once
-router.delete("/api/trips", authenticateAdminApiKey, async (req, res) => {
-  try {
-    await Trip.deleteMany();
-    res.json({ message: "All trips deleted" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+router.delete(
+  "/api/trips",
+  authenticateAdminApiKey,
+  getAllTrips,
+  async (req, res) => {
+    try {
+      if (req.isAdminAuthenticated) {
+        await Trip.deleteMany();
+        getIO().emit("tripsDeleted");
+        res.json({ message: "All trips deleted from database" });
+      } else if (res.trips) {
+        for (let trip of res.trips) {
+          trip.markAsDeleted = true;
+          await trip.save();
+        }
+        const tripIds = res.trips.map((trip) => trip._id);
+        getIO().emit("tripsMarkedAsDeleted", tripIds);
+        res.json({ message: "Trips marked as deleted" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 // deleting one trip by id
 router.delete(
@@ -221,6 +239,7 @@ router.delete(
     try {
       if (req.isAdminAuthenticated) {
         await res.trip.deleteOne();
+        getIO().emit("tripDeleted", res.trip._id);
         res.json({ message: "Trip deleted from database" });
       } else {
         res.trip.markAsDeleted = true;
@@ -237,13 +256,9 @@ router.delete(
 async function getAllTrips(req, res, next) {
   try {
     const tripIds = req.body.tripIds;
-
-    if (!Array.isArray(tripIds) || tripIds.length < 2) {
-      return res.status(400).json({
-        message: "Please provide at least two trip IDs to merge.",
-      });
+    if (!tripIds) {
+      next();
     }
-
     const trips = await Trip.find({ _id: { $in: tripIds } });
 
     if (trips.length !== tripIds.length) {

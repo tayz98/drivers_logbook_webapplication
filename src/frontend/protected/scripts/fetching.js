@@ -3,7 +3,7 @@ let countdownIntervalId = null;
 /*
 --- User Methods ---
 */
-async function loadUserAndSessionInfo() {
+async function fetchUserAndSessionInfo() {
   try {
     const response = await fetch("/api/user/session", {
       credentials: "include",
@@ -70,7 +70,7 @@ function startCountdown(expireTimestamp) {
 /*
 --- Vehicle Methods ---
 */
-async function loadVehicleName(vehicleId) {
+async function fetchVehicleName(vehicleId) {
   try {
     const response = await fetch(`/api/vehicle/${vehicleId}`);
     if (!response.ok) {
@@ -84,7 +84,7 @@ async function loadVehicleName(vehicleId) {
   }
 }
 
-async function loadVehicles() {
+async function fetchVehicles() {
   try {
     const response = await fetch("/api/vehicles", {
       method: "GET",
@@ -94,10 +94,10 @@ async function loadVehicles() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const vehicles = await response.json();
-    console.log("Vehicles received:", vehicles);
-    displayVehicles(vehicles);
+    return vehicles;
   } catch (error) {
     console.error("Error fetching vehicles:", error);
+    throw error;
   }
 }
 
@@ -116,38 +116,16 @@ async function updateVehicle(vehicleId, data) {
       throw new Error(`HTTP-Fehler! Status: ${response.status}`);
     }
 
-    const updatedVehicle = await response.json();
-    console.log("Fahrzeug aktualisiert:", updatedVehicle);
-    return updatedVehicle;
+    return await response.json();
   } catch (error) {
     console.error("Fehler beim Aktualisieren des Fahrzeugs:", error);
-  }
-}
-
-async function createVehicle(formData) {
-  try {
-    const response = await fetch("/api/trip", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Error posting trip:", errorData);
-      return;
-    }
-  } catch (error) {
-    console.error("Error:", error);
   }
 }
 
 /*
 --- Trip Methods ---
 */
-async function loadTrips() {
+async function fetchTrips() {
   try {
     const vehicleId = getVehicleIdFromUrl();
     let endpoint = "/api/trips";
@@ -172,14 +150,29 @@ async function loadTrips() {
     console.error("Error fetching trips:", error);
   }
 }
-const options = {
-  weekday: "long",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-};
 
 function getVehicleIdFromUrl() {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get("vehicleId");
+}
+
+async function postTrip(formData) {
+  try {
+    const response = await fetch("/api/trip", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error posting trip:", errorData);
+      return;
+    }
+    return response;
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
