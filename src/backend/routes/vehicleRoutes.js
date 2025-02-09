@@ -74,6 +74,7 @@ router.get(
 
 // creating a vehicle
 router.post("/api/vehicle", async (req, res) => {
+  console.log(req.body);
   if (req.body.vin != null) {
     const findVehicle = await Vehicle.exists({ _id: req.body.vin });
     if (findVehicle) {
@@ -148,6 +149,7 @@ router.delete(
   getVehicle,
   async (req, res) => {
     try {
+      console.log("Deleting vehicle: ", req.params.id);
       await res.vehicle.deleteOne();
       getIO().emit("vehicleDeleted", { vehicleId: req.params.id });
       res.json({ message: "Vehicle deleted" });

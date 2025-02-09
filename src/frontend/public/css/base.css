@@ -10,7 +10,18 @@
   align-items: center;
   position: fixed;
   padding: 0 1rem;
+  width: 100%;
+  z-index: 1030;
 }
+
+.sidebar:not(.open) {
+  transform: translateX(-100%);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
 
 .custom-header .brand {
   font-size: 2.5rem;
@@ -50,6 +61,7 @@ body {
 
 .main-content {
   margin-left: calc(250px + 1rem);
+  transition: 0.3s ease;
   margin-right: 1rem;
   padding: 1rem;
 }
@@ -68,7 +80,7 @@ body {
   background: white;
 }
 
-.form-control-line-select:valid + label {
+.form-control-line-select:valid+label {
   transform: translateY(-1.5rem);
   font-size: 0.8rem;
   opacity: 0.8;
@@ -87,6 +99,7 @@ body {
 .form-floating-line.has-dropdown:focus-within::after {
   color: #0d6efd;
 }
+
 .form-control-line {
   border: none;
   border-bottom: 1px solid #ccc;
@@ -112,8 +125,8 @@ body {
   pointer-events: none;
 }
 
-.form-control-line:focus + label,
-.form-control-line:not(:placeholder-shown) + label {
+.form-control-line:focus+label,
+.form-control-line:not(:placeholder-shown)+label {
   transform: translateY(-1.5rem);
   font-size: 0.8rem;
   opacity: 0.8;
@@ -206,6 +219,7 @@ body {
   padding: 1rem;
   overflow-y: auto;
   z-index: 1040;
+  transition: transform 0.3s ease;
 }
 
 .fixed-height {
@@ -233,64 +247,91 @@ body {
   text-align: center;
 }
 
-@media (min-width: 1024px) {
-  .sidebar {
-    width: 5vw;
-    min-width: 250px;
-    max-width: 350px;
-  }
+.sidebar.open {
+  transform: translateX(0);
 }
 
-@media (max-width: 1024px) {
-  .sidebar {
-    width: 30vw;
-    min-width: 200px;
-    max-width: 250px;
-  }
+
+.sidebar:not(.open)~.main-content {
+  margin-left: 1rem;
+  transition: 0.3s ease;
 }
 
+
+/* Responsive styles for screens smaller than 768px */
+@media (max-width: 768px) {
+  .custom-header {
+    height: 60px;
+    padding: 0 0.5rem;
+  }
+
+  .custom-header .brand {
+    font-size: 1.5rem;
+  }
+
+  .main-content {
+    margin-left: 1rem;
+  }
+
+
+  .sidebar {
+    transform: translateX(-100%);
+    width: 200px;
+  }
+
+}
+
+
+
+
+/* bootstrap-icons-1.5.0 */
 @font-face {
   font-family: "bootstrap-icons";
-  src: url("../fonts/bootstrap-icons.woff2") format("woff2"),
-    url("../fonts/bootstrap-icons.woff") format("woff");
+  src: url("./fonts/bootstrap-icons.woff2") format("woff2"),
+    url("./fonts/bootstrap-icons.woff") format("woff");
 }
 
+/* open-sans-400 - latin */
 @font-face {
   font-display: swap;
   font-family: "Open Sans";
   font-style: normal;
   font-weight: 400;
-  src: url("../fonts/open-sans-v40-latin-regular.woff2") format("woff2");
+  src: url("./fonts/open-sans-v40-latin-regular.woff2") format("woff2");
 }
+
 /* open-sans-500 - latin */
 @font-face {
   font-display: swap;
   font-family: "Open Sans";
   font-style: normal;
   font-weight: 500;
-  src: url("../fonts/open-sans-v40-latin-500.woff2") format("woff2");
+  src: url("./fonts/open-sans-v40-latin-500.woff2") format("woff2");
 }
+
 /* open-sans-600 - latin */
 @font-face {
   font-display: swap;
   font-family: "Open Sans";
   font-style: normal;
   font-weight: 600;
-  src: url("../fonts/open-sans-v40-latin-600.woff2") format("woff2");
+  src: url("./fonts/open-sans-v40-latin-600.woff2") format("woff2");
 }
+
 /* open-sans-700 - latin */
 @font-face {
   font-display: swap;
   font-family: "Open Sans";
   font-style: normal;
   font-weight: 700;
-  src: url("../fonts/open-sans-v40-latin-700.woff2") format("woff2");
+  src: url("./fonts/open-sans-v40-latin-700.woff2") format("woff2");
 }
+
 /* open-sans-800 - latin */
 @font-face {
   font-display: swap;
   font-family: "Open Sans";
   font-style: normal;
   font-weight: 800;
-  src: url("../fonts/open-sans-v40-latin-800.woff2") format("woff2");
+  src: url("./fonts/open-sans-v40-latin-800.woff2") format("woff2");
 }

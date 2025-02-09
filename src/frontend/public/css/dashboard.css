@@ -9,14 +9,29 @@
 .grid-form-container {
   display: flex;
   gap: 20px;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
+}
+
+
+
+.trip-incorrect {
+  background-color: #ffebee !important;
+  border: 1px solid #ffcdd2 !important;
 }
 
 .trip-checked {
   background-color: #e8f5e9 !important;
   opacity: 0.9;
 }
+
+.trip-incorrect.trip-checked {
+  background-color: #e8f5e9 !important;
+  border: 1px solid #c8e6c9 !important;
+  opacity: 0.9;
+}
+
+
 
 .selected-row {
   outline: 2px solid blue !important;
@@ -25,14 +40,32 @@
 #gridContainer {
   flex: 1;
   max-width: none;
-  width: auto;
+  width: 100%;
   padding: 0;
   margin: 0;
 }
 
-#editTripForm {
-  width: 40%;
+#formContainer {
+  width: 49%;
+  display: none;
+  flex-direction: column;
+  gap: 20px;
 }
+
+#editTripForm {
+  width: 100%;
+}
+
+/* Icons Standardaussehen */
+
+
+#routeMap {
+  height: 300px;
+  margin-top: 20px;
+  display: none;
+  width: 100%
+}
+
 
 .date-row {
   height: fit-content !important;
@@ -45,14 +78,13 @@
   justify-content: start !important;
 }
 
-/* Icons Standardaussehen */
 
 .bi-trash,
 .bi-union {
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s;
-  visibility: hidden; /* Standardmäßig versteckt */
+  visibility: hidden;
 }
 
 .bi-trash:hover,
@@ -60,7 +92,6 @@
   opacity: 1;
 }
 
-/* Sichtbare Icons */
 .bi-trash.visible,
 .bi-union.visible {
   visibility: visible;

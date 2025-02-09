@@ -1,3 +1,22 @@
+function getDistanceInKm(lat1, lon1, lat2, lon2) {
+  function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+    Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c;
+  return d;
+}
+
+
 function displayTripNotes(tripNotesArray) {
   const notesContainer = document.getElementById("tripNotesDisplay");
   console.log("notesContainer", notesContainer);
@@ -16,7 +35,7 @@ function displayTripNotes(tripNotesArray) {
     !Array.isArray(tripNotesArray) ||
     tripNotesArray.length === 0
   ) {
-    notesContainer.textContent = "ist kein array";
+    notesContainer.textContent = "";
     return;
   }
 
@@ -38,43 +57,55 @@ function displayTripNotes(tripNotesArray) {
   notesContainer.appendChild(notesList);
 }
 
-document.addEventListener("click", async function (e) {
-  // Handle trip row clicks
-  let clickedRow;
-  const logoutButton = e.target.closest("#logoutButton");
-  const isCheckboxClick = e.target.closest(".form-check, .form-check-input");
 
-  if (logoutButton) {
-    handleLogout(e);
-  }
 
-  if (!isCheckboxClick) {
-    const clickedRow = e.target.closest(".row.trip-row");
-    if (clickedRow) await handleTripRowClick(clickedRow);
-  }
 
-  if (clickedRow) {
-    await handleTripRowClick(clickedRow);
-  }
+async function handleClickEvents() {
 
-  // Handle search button clicks
-  if (e.target.closest(".search-button") || e.target.id === "search-button") {
-    handleSearchButtonClick(e);
-  }
+  document.addEventListener("click", async (e) => {
+    // Handle trip row clicks
+    let clickedRow;
+    const logoutButton = e.target.closest("#logoutButton");
+    const isCheckboxClick = e.target.closest(".form-check, .form-check-input");
+    const sidebarToggle = e.target.closest("#sidebarToggle");
 
-  // Handle add trip button clicks
-  if (
-    e.target.closest(".add-trip-button") ||
-    e.target.id === "add-trip-button"
-  ) {
-    handleAddTripButtonClick(e);
-  }
+    if (sidebarToggle) {
+      console.log("Sidebar toggle clicked");
+      const sidebar = document.querySelector(".sidebar");
+      sidebar.classList.toggle("open");
+    }
+    if (logoutButton) {
+      handleLogout(e);
+    }
 
-  // Handle edit button clicks
-  if (e.target.closest(".edit-button") || e.target.id === "edit-button") {
-    handleEditButtonClick(e);
-  }
-});
+    if (!isCheckboxClick) {
+      const clickedRow = e.target.closest(".row.trip-row");
+      if (clickedRow) await handleTripRowClick(clickedRow);
+    }
+
+    if (clickedRow) {
+      await handleTripRowClick(clickedRow);
+    }
+
+    // Handle search button clicks
+    if (e.target.closest(".search-button") || e.target.id === "search-button") {
+      handleSearchButtonClick(e);
+    }
+
+    // Handle add trip button clicks
+    if (
+      e.target.closest(".add-trip-button") ||
+      e.target.id === "add-trip-button"
+    ) {
+      handleAddTripButtonClick(e);
+    }
+
+    // Handle edit button clicks
+    if (e.target.closest(".edit-button") || e.target.id === "edit-button") {
+      handleEditButtonClick(e);
+    }
+  });
+}
 
 async function handleTripRowClick(clickedRow) {
   console.log("Trip row clicked:", clickedRow.dataset.tripId);
@@ -82,6 +113,8 @@ async function handleTripRowClick(clickedRow) {
   const vehicleId = clickedRow.dataset.vehicleId;
   const editTripForm = document.getElementById("editTripForm");
   const tripContainer = document.getElementById("gridContainer");
+  const formContainer = document.getElementById("formContainer");
+  const gridFormContainer = document.querySelector(".grid-form-container");
 
   if (clickedRow.classList.contains("selected-row")) {
     clickedRow.classList.remove("selected-row");
@@ -93,11 +126,26 @@ async function handleTripRowClick(clickedRow) {
       tripContainer.classList.remove("resized-grid");
       console.log("Resizing grid");
     }
+    const mapContainer = document.getElementById("routeMap");
+    if (mapContainer) {
+      mapContainer.style.display = "none";
+    }
+    if (gridFormContainer) {
+      gridFormContainer.style.flexDirection = "row";
+    }
+    if (formContainer) {
+      formContainer.style.display = "none";
+    }
+
   } else {
     document.querySelectorAll(".trip-row.selected-row").forEach((row) => {
       row.classList.remove("selected-row");
     });
     clickedRow.classList.add("selected-row");
+
+    if (formContainer) {
+      formContainer.style.display = "flex";
+    }
 
     if (editTripForm) {
       console.log("Showing form");
@@ -121,6 +169,7 @@ async function handleTripRowClick(clickedRow) {
         editTripForm.elements["tripCategory"].dispatchEvent(
           new Event("change")
         );
+        renderRouteMap(tripData);
       }
     } else {
       console.error("Edit trip form not found");
@@ -191,3 +240,104 @@ async function handleLogout(e) {
   e.preventDefault();
   logOutUser();
 }
+
+
+/**
+ * Render a Leaflet map showing the route between the trip's start and end addresses.
+ * Uses Nominatim to geocode the addresses.
+ */
+async function renderRouteMap(tripData) {
+  const mapContainer = document.getElementById("routeMap");
+  if (!mapContainer) {
+    console.error("Route map container element (id 'routeMap') not found in the DOM.");
+    return;
+  }
+  // Check that both addresses exist.
+  if (
+    !tripData.startLocation ||
+    !tripData.endLocation ||
+    !tripData.startLocation.street ||
+    !tripData.startLocation.city ||
+    !tripData.startLocation.postalCode ||
+    !tripData.endLocation.street ||
+    !tripData.endLocation.city ||
+    !tripData.endLocation.postalCode
+  ) {
+    mapContainer.style.display = "none";
+    return;
+  }
+
+  const startAddress = `${tripData.startLocation.street}, ${tripData.startLocation.postalCode} ${tripData.startLocation.city}`;
+  const endAddress = `${tripData.endLocation.street}, ${tripData.endLocation.postalCode} ${tripData.endLocation.city}`;
+
+  try {
+    const startRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(startAddress)}`
+    );
+    const startData = await startRes.json();
+    const endRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endAddress)}`
+    );
+    const endData = await endRes.json();
+
+    if (startData.length === 0 || endData.length === 0) {
+      mapContainer.style.display = "none";
+      return;
+    }
+
+    const startCoords = [parseFloat(startData[0].lat), parseFloat(startData[0].lon)];
+    const endCoords = [parseFloat(endData[0].lat), parseFloat(endData[0].lon)];
+
+    // Remove previous map instance if it exists.
+    if (window.routeMapInstance) {
+      window.routeMapInstance.remove();
+    }
+
+    // Create new map instance and set initial view.
+    window.routeMapInstance = L.map("routeMap").setView(startCoords, 13);
+
+    // Add OpenStreetMap tile layer.
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors"
+    }).addTo(window.routeMapInstance);
+
+    // Add markers for start and end.
+    L.marker(startCoords).addTo(window.routeMapInstance)
+      .bindPopup("Start: " + startAddress).openPopup();
+    L.marker(endCoords).addTo(window.routeMapInstance)
+      .bindPopup("End: " + endAddress);
+
+    // Draw a polyline connecting the two points.
+    const routeLine = L.polyline([startCoords, endCoords], { color: "blue" }).addTo(window.routeMapInstance);
+
+    // Compute the distance between the two points.
+    const distanceKm = getDistanceInKm(startCoords[0], startCoords[1], endCoords[0], endCoords[1]);
+    // Determine an appropriate maxZoom based on the distance.
+    let maxZoom;
+    if (distanceKm < 1) {
+      maxZoom = 16;
+    } else if (distanceKm < 5) {
+      maxZoom = 14;
+    } else if (distanceKm < 20) {
+      maxZoom = 12;
+    } else {
+      maxZoom = 10;
+    }
+    // Fit bounds with the computed maxZoom.
+    window.routeMapInstance.fitBounds(routeLine.getBounds(), { padding: [20, 20], maxZoom: maxZoom });
+
+    // Show the map container.
+    mapContainer.style.display = "block";
+    // Recalculate the map size after a short delay.
+    setTimeout(() => {
+      if (window.routeMapInstance) {
+        window.routeMapInstance.invalidateSize();
+      }
+    }, 200);
+
+  } catch (error) {
+    console.error("Error rendering route map:", error);
+    mapContainer.style.display = "none";
+  }
+}
+

@@ -29,7 +29,6 @@ function displayTrips(trips) {
       trip.tripCategory
     );
     const endAddress = formattedAddress(trip.endLocation, trip.tripCategory);
-    const tripDate = new Date(trip.startTimestamp).toLocaleDateString();
     const category = trip.tripCategory;
 
     if (!lastDate || formattedDate !== lastDate) {
@@ -61,9 +60,9 @@ function displayTrips(trips) {
     }
 
     const tripRow = document.createElement("div");
-    tripRow.className = `row trip-row border bg-white rounded fixed-height mb-2 ${
-      trip.checked ? "trip-checked" : ""
-    }`;
+    tripRow.className = `row trip-row border bg-white rounded fixed-height mb-2 ${trip.checked ? "trip-checked" : ""
+      } ${trip.tripStatus === "incorrect" ? "trip-incorrect" : ""
+      }`;
     tripRow.dataset.groupId = `group-${groupCounter}`;
 
     tripRow.dataset.tripId = trip._id;
@@ -76,13 +75,13 @@ function displayTrips(trips) {
             </div>
             <div class="col-auto d-flex flex-column align-items-center justify-content-center">
               <span>${new Date(trip.startTimestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}</span>
+      hour: "2-digit",
+      minute: "2-digit",
+    })}</span>
               <span>${new Date(trip.endTimestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}</span>
+      hour: "2-digit",
+      minute: "2-digit",
+    })}</span>
             </div>
             <div class="col d-flex align-items-center">
               <div class="d-flex flex-column align-items-start">
@@ -95,8 +94,8 @@ function displayTrips(trips) {
             </div>
             <div class="col-auto d-flex align-items-center">
               <span>${calculateDistance(
-                trip
-              )}</span> <!-- Implement this function -->
+      trip
+    )}</span> <!-- Implement this function -->
             </div>
             <div class="col-auto d-flex align-items-center">
               <i class="${getIconForCategory(category)}"></i>
@@ -105,6 +104,16 @@ function displayTrips(trips) {
     container.appendChild(tripRow);
   });
   setTimeout(setupCheckboxListeners, 0);
+}
+let specificVehicleId = null;
+function checkUrlForVehicleId() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    specificVehicleId = urlParams.get("vehicleId");
+  } catch (error) {
+    console.error("Error parsing URL:", error);
+    specificVehicleId = null;
+  }
 }
 
 function getIconForCategory(category) {
@@ -305,12 +314,16 @@ function calculateDistance(trip) {
 
 function formattedAddress(location, category) {
   if (!location || !location.street || !location.postalCode || !location.city) {
-    return "Fehlende Adresse";
+    return "Adresse unbekannt";
   }
   return `${location.street}, ${location.postalCode} ${location.city}`;
 }
 
 autorun(() => {
   console.log("Trips changed:", tripStore.trips);
-  displayTrips(tripStore.trips);
+  if (specificVehicleId) {
+    displayTrips(tripStore.trips.filter((trip) => trip.vehicleId === specificVehicleId));
+  } else {
+    displayTrips(tripStore.trips);
+  }
 });

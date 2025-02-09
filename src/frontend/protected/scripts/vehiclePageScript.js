@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
   validateForm();
 
   tripForm.addEventListener("submit", async function (e) {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault();
     const startTimestamp = document.getElementById("startTimestamp").value;
     const startDate = new Date(startTimestamp);
     startDate.setSeconds(0, 0);
@@ -203,7 +203,7 @@ async function displayVehicles(vehicles) {
     console.log(vehicle);
 
     container.innerHTML += `
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+      <div class="col-auto">
         <div class="card shadow-sm mb-2 compact-card"
              data-id="${vehicle._id}"
              data-custom-name="${vehicle.customName ?? "Unbekannt"}"
@@ -218,7 +218,7 @@ async function displayVehicles(vehicles) {
                     class="btn btn-link p-0 text-white add-trip-button"
                     title="Fahrt hinzufügen"
                   >
-                    <i class="bi bi-plus-circle fs-6"></i>
+                    <i class="bi bi-plus-circle fs-5"></i>
                   </button>
               <button
                 class="btn btn-link p-0 text-white edit-button"
@@ -226,10 +226,10 @@ async function displayVehicles(vehicles) {
                 data-bs-target="#editVehicleModal"
                 title="Bearbeiten"
               >
-                <i class="bi bi-pencil-square fs-6"></i>
+                <i class="bi bi-pencil-square fs-5"></i>
               </button>
               <a href="#" class="text-white ms-1 search-button" title="Fahrten anzeigen">
-                <i class="bi bi-search fs-6"></i>
+                <i class="bi bi-search fs-5"></i>
               </a>
             </div>
           </div>
@@ -239,9 +239,8 @@ async function displayVehicles(vehicles) {
               <dd class="col-7 small vin">${vehicle._id}</dd>
 
               <dt class="col-5 small text-muted">Hersteller:</dt>
-              <dd class="col-7 small">${
-                vehicle.manufacturer ?? "Unbekannt"
-              }</dd>
+              <dd class="col-7 small">${vehicle.manufacturer ?? "Unbekannt"
+      }</dd>
 
               <dt class="col-5 small text-muted">Modell:</dt>
               <dd class="col-7 small">${vehicle.model ?? "Unbekannt"}</dd>
@@ -250,9 +249,8 @@ async function displayVehicles(vehicles) {
               <dd class="col-7 small">${vehicle.year ?? "Unbekannt"}</dd>
               
               <dt class="col-5 small text-muted">Kennzeichen:</dt>
-              <dd class="col-7 small">${
-                vehicle.licensePlate ?? "Unbekannt"
-              }</dd>
+              <dd class="col-7 small">${vehicle.licensePlate ?? "Unbekannt"
+      }</dd>
             </dl>
           </div>
         </div>

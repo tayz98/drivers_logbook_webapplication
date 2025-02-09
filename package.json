@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node src/backend/server.js",
     "debug": "node src/backend/server.js --trace-warnings",
-    "dev": "nodemon src/backend/server.js"
+    "dev": "nodemon src/backend/server.js",
+    "linuxStart": "sudo node src/backend/server.js",
+    "linuxDev": "sudo nodemon src/backend/server.js"
   },
   "author": "Alexander Nachtigal",
   "license": "ISC",

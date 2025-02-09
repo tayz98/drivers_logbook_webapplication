@@ -1,3 +1,8 @@
+/*
+Since the switch to socket.io, the fetch methods are not used (except for user methods).
+*/
+
+
 let countdownIntervalId = null;
 
 /*
@@ -145,32 +150,6 @@ async function fetchTrip(tripId) {
   }
 }
 
-async function fetchTrips() {
-  try {
-    const vehicleId = getVehicleIdFromUrl();
-    let endpoint = "/api/trips";
-
-    if (vehicleId) {
-      endpoint += `?vehicleId=${encodeURIComponent(vehicleId)}`;
-    }
-
-    const response = await fetch(endpoint, {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const trips = await response.json();
-    console.log("Trips received:", trips);
-    displayTrips(trips);
-  } catch (error) {
-    console.error("Error fetching trips:", error);
-  }
-}
-
 async function updateTrip(tripId, formData) {
   console.log("FormData in Json:");
   console.log(JSON.stringify(formData));
@@ -193,11 +172,6 @@ async function updateTrip(tripId, formData) {
   } catch (error) {
     console.error("Error:", error);
   }
-}
-
-function getVehicleIdFromUrl() {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("vehicleId");
 }
 
 async function postTrip(formData) {
