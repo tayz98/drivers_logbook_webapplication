@@ -12,6 +12,7 @@ router.get("/", (req, res) => {
         "..",
         "frontend",
         "protected",
+        "pages",
         "dashboard.html"
       )
     );
@@ -21,20 +22,44 @@ router.get("/", (req, res) => {
       "no-store, no-cache, must-revalidate, private"
     );
     return res.sendFile(
-      path.join(__dirname, "..", "..", "frontend", "public", "index.html")
+      path.join(
+        __dirname,
+        "..",
+        "..",
+        "frontend",
+        "public",
+        "pages",
+        "index.html"
+      )
     );
   }
 });
 
 router.get("/vehicles", isAuthenticated, (req, res) => {
   return res.sendFile(
-    path.join(__dirname, "..", "..", "frontend", "protected", "vehicles.html")
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "frontend",
+      "protected",
+      "pages",
+      "vehicles.html"
+    )
   );
 });
 
 router.get("/flutter_logs", (req, res) => {
   return res.sendFile(
-    path.join(__dirname, "..", "..", "frontend", "public", "flutter_logs.html")
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "frontend",
+      "public",
+      "pages",
+      "flutter_logs.html"
+    )
   );
 });
 

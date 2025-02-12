@@ -3,6 +3,5 @@ src/backend/logs/
 src/middleware/logs/*
 src/middleware/logs
 .env
-*.rest
 *.log
 */logs

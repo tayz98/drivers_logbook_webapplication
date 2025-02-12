@@ -100,7 +100,7 @@ async function getTrip(req, res, next) {
 }
 
 router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
-  const timestamp = formatDate(new Date().toLocaleString());
+  const timestamp = formatDate(new Date());
   console.log(req.body);
   let vehicleId;
   if (req.body.vehicle && req.body.vehicle.vin !== "") {
@@ -164,52 +164,52 @@ router.patch(
   authenticateSessionOrApiKey,
   async (req, res) => {
     // console.log("Trip received in patch route:" + res.trip);
-    if (!isTripEditableWithinSevenDays(res.trip.startTimestamp)) {
-      return res.status(403).json({
-        message: "You are not allowed to edit trips older than 7 days!",
-      });
-    }
-
-    const timestamp = formatDate(new Date().toLocaleString());
-
-    res.trip.checked = true;
-
-    if (req.body.tripNotes != null) {
-      if (!req.body.tripNotes.trim() === "") {
-        res.trip.tripNotes.push(
-          `${req.body.tripNotes} | Letzte Änderung: ${timestamp}`
-        );
-      }
-    }
-
-    if (req.body.clientCompany != null) {
-      res.trip.clientCompany = req.body.clientCompany;
-    }
-
-    if (req.body.client != null) {
-      res.trip.client = req.body.client;
-    }
-
-    if (req.body.detourNote != null) {
-      res.trip.detourNote = req.body.detourNote;
-    }
-
-    if (req.body.tripCategory != null) {
-      if (res.trip.tripCategory !== req.body.tripCategory) {
-        res.trip.tripNotes.push(
-          `Die Kategorie wurde am ${timestamp} von ${formatCategory(
-            res.trip.tripCategory
-          )} auf ${formatCategory(req.body.tripCategory)} korrigiert.`
-        );
-        res.trip.tripCategory = req.body.tripCategory;
-      }
-    }
-
-    if (req.body.tripPurpose != null) {
-      res.trip.tripPurpose = req.body.tripPurpose;
-    }
-
     try {
+      if (!isTripEditableWithinSevenDays(res.trip.startTimestamp)) {
+        return res.status(403).json({
+          message: "You are not allowed to edit trips older than 7 days!",
+        });
+      }
+
+      const timestamp = formatDate(new Date());
+
+      res.trip.checked = true;
+
+      if (req.body.tripNotes != null) {
+        if (req.body.tripNotes.trim() !== "") {
+          res.trip.tripNotes.push(
+            `${req.body.tripNotes} | Letzte Änderung: ${timestamp}`
+          );
+        }
+      }
+
+      if (req.body.clientCompany != null) {
+        res.trip.clientCompany = req.body.clientCompany;
+      }
+
+      if (req.body.client != null) {
+        res.trip.client = req.body.client;
+      }
+
+      if (req.body.detourNote != null) {
+        res.trip.detourNote = req.body.detourNote;
+      }
+
+      if (req.body.tripCategory != null) {
+        if (res.trip.tripCategory !== req.body.tripCategory) {
+          res.trip.tripNotes.push(
+            `Die Kategorie wurde am ${timestamp} von ${formatCategory(
+              res.trip.tripCategory
+            )} auf ${formatCategory(req.body.tripCategory)} korrigiert.`
+          );
+          res.trip.tripCategory = req.body.tripCategory;
+        }
+      }
+
+      if (req.body.tripPurpose != null) {
+        res.trip.tripPurpose = req.body.tripPurpose;
+      }
+
       const updatedTrip = await res.trip.save();
       // getIO().emit("tripUpdated", updatedTrip);
       getIO().emit("tripsUpdated", [updatedTrip]);

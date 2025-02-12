@@ -2,6 +2,7 @@ const { makeAutoObservable, autorun, autoBind, observable } = mobx;
 
 class TripStore {
   trips = [];
+  specificVehicleId = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });

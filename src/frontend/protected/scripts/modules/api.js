@@ -2,7 +2,6 @@
 Since the switch to socket.io, the fetch methods are not used (except for user methods).
 */
 
-
 let countdownIntervalId = null;
 
 /*

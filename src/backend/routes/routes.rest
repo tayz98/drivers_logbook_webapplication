@@ -1,0 +1,135 @@
+
+### TRIPS:
+
+
+GET http://localhost:80/api/trips
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+
+###
+
+GET http://localhost:80/api/trip/133
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+###
+
+
+
+
+
+
+### VEHICLES:
+
+GET http://localhost:80/api/vehicles
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+
+###
+GET http://localhost:80/api/vehicle/TMBZZZAAZGD640887
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+
+###
+
+POST http://localhost:80/api/vehicle
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+{
+  "vin": "TMBZZZAAZGD640885"
+}
+
+###
+
+PATCH http://localhost:80/api/vehicle/TMBZZZAAZGD640887
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+{
+  "model": "Octav22a"
+}
+
+###
+
+GET http://localhost:80/api/users
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+
+###
+
+GET http://novacorp-fahrtenbuch.ipv64.net:1516/api/trips
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+###
+
+GET http://localhost:80/api/trips/679fb5fffdc0d9a905c8884f
+Content-Type: application/json
+
+
+###
+
+
+
+### USERS:
+
+POST http://localhost:80/api/user
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+{
+  "username": "dispatcher",
+  "password": "password",
+  "firstName": "Max",
+  "lastName": "Mustermann",
+  "email": "max.mustermann@example.com",
+  "role": "dispatcher"
+}
+
+###
+
+POST http://localhost/api/login
+Content-Type: application/json
+
+{
+  "username": "dispatcher",
+  "password": "password"
+}
+
+
+
+###
+
+GET http://localhost:80/api/users
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+###
+
+GET http://localhost:3000/api/trip/15
+
+
+###
+GET http://novacorp-fahrtenbuch.ipv64.net:1516/api/trips/
+
+###
+
+POST http://localhost:3000/api/trip
+Content-Type: application/json
+
+
+
+###
+
+GET /api/vin-analyzer/analyze
+Content-Type: application/json
+
+
+###
+DELETE http://localhost:3000/api/trips
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758

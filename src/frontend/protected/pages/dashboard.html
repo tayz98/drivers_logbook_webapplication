@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaCorp - Fahrtenbuch</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="/css/base.css" rel="stylesheet" />
+    <link href="/css/dashboard.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      crossorigin=""
+    />
+    />
+  </head>
+
+  <body class="custom-body">
+    <div id="header-container"></div>
+    <div id="sidebar-container"></div>
+    <!-- HAUPTBEREICH -->
+    <main class="main-content">
+      <!-- GRID AND FORM CONTAINER -->
+      <div class="grid-form-container">
+        <!-- GRID -->
+        <div class="my-3" id="gridContainer">
+          <div class="mb-2">
+            <div class="row fixed-height">
+              <div class="col-auto d-flex align-items-center">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" />
+                </div>
+              </div>
+              <div class="col d-flex align-items-center">
+                <span>Heute</span>
+              </div>
+              <div class="col-auto d-flex align-items-center">
+                <i class="bi bi-union"></i>
+                <i class="bi bi-trash-fill me-2"></i>
+              </div>
+            </div>
+          </div>
+          <div class="row border bg-white rounded fixed-height">
+            <div class="col-auto d-flex align-items-center">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" />
+              </div>
+            </div>
+            <div
+              class="col-auto d-flex flex-column align-items-center justify-content-center"
+            >
+              <span>12:00</span>
+              <span>12:30</span>
+            </div>
+            <div class="col d-flex align-items-center">
+              <div class="d-flex flex-column align-items-start">
+                <div class="d-flex align-items-center">
+                  <span>Musterstraße 1, 28249 Hamburg</span>
+                  <i class="bi bi-pencil-fill fs-6 ms-2"></i>
+                </div>
+                <span>Musterstraße 10, 29089 Kiel</span>
+              </div>
+            </div>
+            <div class="col-auto d-flex align-items-center">
+              <span>100 km</span>
+            </div>
+            <div class="col-auto d-flex align-items-center">
+              <i class="bi bi-briefcase-fill"></i>
+            </div>
+          </div>
+        </div>
+        <div id="formContainer" style="display: none">
+          <form class="tripForm" id="editTripForm" style="display: none">
+            <h3
+              style="text-align: center; margin-bottom: 20px"
+              id="vehicleName"
+            >
+              Fahrzeug:
+            </h3>
+
+            <div class="row g-4">
+              <input type="hidden" id="vehicleVin" name="vehicleVin" value="" />
+              <input type="hidden" id="tripId" , name="tripId" value="" />
+
+              <div class="col-md-6">
+                <div class="form-floating-line has-dropdown">
+                  <select
+                    id="category"
+                    name="tripCategory"
+                    class="form-control-line-select"
+                  >
+                    <option value="" selected disabled>
+                      Bitte auswählen...
+                    </option>
+                    <option value="business">Dienstlich</option>
+                    <option value="private">Privat</option>
+                    <option value="commute">Arbeitsweg</option>
+                  </select>
+                  <label for="category">Kategorie</label>
+                </div>
+                <div class="form-floating-line">
+                  <input
+                    type="text"
+                    id="purpose"
+                    class="form-control-line"
+                    name="tripPurpose"
+                    placeholder=" "
+                  />
+                  <label for="purpose">Anlass</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating-line">
+                  <input
+                    type="text"
+                    id="client"
+                    name="client"
+                    class="form-control-line"
+                    placeholder=" "
+                  />
+                  <label for="client">Firma</label>
+                </div>
+                <div class="form-floating-line">
+                  <input
+                    type="text"
+                    id="businessPartner"
+                    name="businessPartner"
+                    class="form-control-line"
+                    placeholder=" "
+                  />
+                  <label for="businessPartner">Geschäftspartner</label>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-floating-line text-center">
+                  <input
+                    type="text"
+                    id="detour"
+                    name="detour"
+                    class="form-control-line-center"
+                    placeholder=" "
+                  />
+                  <label for="detour">Gefahrener Umweg</label>
+                </div>
+                <div class="col-13">
+                  <div class="form-floating-note text-center">
+                    <textarea
+                      id="notes"
+                      name="notes"
+                      class="form-control"
+                      placeholder="Notizen"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                  <div id="tripNotesDisplay"></div>
+                </div>
+              </div>
+
+              <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary">
+                  Fahrt speichern
+                </button>
+              </div>
+            </div>
+          </form>
+          <div id="routeMap"></div>
+        </div>
+      </div>
+    </main>
+    <!-- Action Modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitle">Aktion bestätigen</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p id="modalBody"></p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="modalActionButton"
+            >
+              Bestätigen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/scripts/libraries/mobx.umd.production.min.js"></script>
+    <script src="/scripts/libraries/socket.io.min.js"></script>
+    <script src="/scripts/libraries/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/modules/domUtils.js"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+      crossorigin=""
+    ></script>
+    <script src="/protected/scripts/models/tripStore.js"></script>
+    <script src="/protected/scripts/modules/utils.js"></script>
+    <script src="/protected/scripts/modules/api.js"></script>
+    <script src="/protected/scripts/modules/commonEventHandlers.js"></script>
+    <script src="/protected/scripts/dashboard.js"></script>
+    <script>
+      checkUrlForVehicleId();
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadHTML("#header-container", "/templates/header.html");
+        await loadHTML("#sidebar-container", "/templates/sidebar.html");
+        fetchUserAndSessionInfo();
+        handleCommonClickEvents();
+        handleDashboardClickEvents();
+      });
+
+      // document.addEventListener("DOMContentLoaded", fetchUserAndSessionInfo);
+      // document.addEventListener("DOMContentLoaded", checkUrlForVehicleId);
+      // document.addEventListener("DOMContentLoaded", handleClickEvents);
+    </script>
+    <script src="http://localhost:1516/livereload.js?snipver=1"></script>
+  </body>
+</html>

@@ -29,7 +29,6 @@ async function login() {
 
       document.getElementById("errorMsg").innerHTML = "";
 
-      // Eingaben abrufen
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 

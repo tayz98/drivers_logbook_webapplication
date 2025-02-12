@@ -10,11 +10,7 @@
     <link href="/css/index.css" rel="stylesheet" />
   </head>
   <body class="custom-body">
-    <header class="custom-header fixed-top">
-      <div class="container-fluid d-flex align-items-center">
-        <span class="brand">NovaCorp</span>
-      </div>
-    </header>
+    <div id="header-container"></div>
     <div class="container">
       <div
         class="flex-grow-1 d-flex justify-content-center align-items-center min-vh-100"
@@ -76,10 +72,14 @@
       </div>
     </div>
     <script src="http://localhost:1516/livereload.js?snipver=1"></script>
-    <script src="/scripts/bootstrap.bundle.min.js"></script>
-    <script src="/scripts/indexPageScript.js"></script>
+    <script src="/scripts/libraries/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/modules/domUtils.js"></script>
+    <script src="/scripts/index.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", login);
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadHTML("#header-container", "/templates/header.html");
+        login();
+      });
     </script>
   </body>
 </html>
