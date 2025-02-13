@@ -328,13 +328,20 @@ function showActionModal(actionType, tripIds) {
     actionType === "delete"
       ? "Möchten Sie diese Fahrt wirklich löschen?"
       : "Möchten Sie diese Fahrten wirklich zusammenführen?";
+  const modalActionButton = document.getElementById("modalActionButton");
 
   const modal = new bootstrap.Modal(document.getElementById("actionModal"));
   document.getElementById("modalTitle").textContent = modalTitle;
   document.getElementById("modalBody").textContent = modalBody;
-  document.getElementById("modalActionButton").dataset.tripIds =
-    tripIds.join(",");
   modal.show();
+  modalActionButton.onclick = async () => {
+    if (actionType === "delete") {
+      await deleteTrip(tripIds[0]);
+    } else {
+      await mergeTrips(tripIds);
+    }
+    modal.hide();
+  };
 }
 
 function calculateDistance(trip) {

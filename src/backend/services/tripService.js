@@ -1,5 +1,5 @@
 const Trip = require("../models/tripSchema");
-const formatDate = require("../utility");
+const { formatDate } = require("../utility");
 
 function buildTripQuery(userRole, user) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -32,9 +32,11 @@ async function mergeTrips(trips) {
     throw new Error("At least two trips are required to merge.");
   }
 
-  const mergedTripNotes = trips.reduce((acc, trip) => {
-    return acc.concat(trip.tripNotes);
-  }, []);
+  // const mergedTripNotes = trips.reduce((acc, trip) => {
+  //   return acc.concat(trip.tripNotes);
+  // }, []);
+
+  const mergedTripNotes = [];
 
   const mergedTripIds = trips.map((trip) => trip._id).join(" & ");
   mergedTripNotes.push(
@@ -49,12 +51,25 @@ async function mergeTrips(trips) {
     return trip.endTimestamp > latest.endTimestamp ? trip : latest;
   }, trips[0]);
 
+  const tripCategory = trips.every(
+    (trip) => trip.tripCategory === trips[0].tripCategory
+  )
+    ? trips[0].tripCategory
+    : "business";
+
   const mergedTrip = new Trip({
     startLocation: firstTrip.startLocation,
     endLocation: lastTrip.endLocation,
-    startDate: firstTrip.startDate,
-    endDate: lastTrip.endDate,
+    startTimestamp: firstTrip.startTimestamp,
+    endTimestamp: lastTrip.endTimestamp,
+    tripCategory: tripCategory,
     tripNotes: mergedTripNotes,
+    tripStatus: "completed",
+    vehicleId: firstTrip.vehicleId,
+    recorded: false,
+    checked: false,
+    startMileage: firstTrip.startMileage,
+    endMileage: lastTrip.endMileage,
   });
 
   await mergedTrip.save();
@@ -62,9 +77,13 @@ async function mergeTrips(trips) {
   const tripIds = trips.map((trip) => trip._id);
   await Trip.updateMany(
     { _id: { $in: tripIds } },
-    { replacedByTripId: mergedTrip._id },
-    { markAsDeleted: true }
+    {
+      replacedByTripId: mergedTrip._id,
+      markAsDeleted: true,
+      tripNotes: `Fahrt wurde durch ID: ${mergedTrip._id} ersetzt.`,
+    }
   );
+
   return mergedTrip;
 }
 

@@ -193,3 +193,43 @@ async function postTrip(formData) {
     console.error("Error:", error);
   }
 }
+
+async function deleteTrip(tripId) {
+  try {
+    const response = await fetch(`/api/trip/${tripId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error deleting trip:", errorData);
+      return;
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+async function mergeTrips(tripIds) {
+  try {
+    const response = await fetch("/api/trips/merge", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ tripIds: tripIds }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error merging trips:", errorData);
+      return;
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}

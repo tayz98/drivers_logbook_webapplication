@@ -62,20 +62,11 @@ module.exports = {
         const userRole = user ? user.role : null;
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         const query = buildTripQuery(userRole, user);
+        // IMPORTANT: Uncomment the following line to filter trips the user is allowed to see
         // const trips = await Trip.find(query);
-        const trips = await Trip.find();
+        const trips = await Trip.find({ markAsDeleted: false });
         socket.emit("trips", trips);
       });
-
-      // socket.on("tripUpdated", async (trip) => {
-      //   try {
-      //     if (trip) {
-      //       io.emit("tripUpdated", trip);
-      //     }
-      //   } catch (error) {
-      //     console.error("Error updating trip:", error);
-      //   }
-      // });
 
       socket.on("tripsUpdated", async (trips) => {
         try {
@@ -146,6 +137,9 @@ module.exports = {
 
 function shouldEmitTrip(trip, user) {
   const userRole = user ? user.role : null;
+  if (trip.markAsDeleted === true) {
+    return false;
+  }
   if (userRole === "admin") {
     return true;
   }

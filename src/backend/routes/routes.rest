@@ -9,7 +9,7 @@ x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 ###
 
-GET http://localhost:80/api/trip/133
+GET http://localhost:80/api/trip/129
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 

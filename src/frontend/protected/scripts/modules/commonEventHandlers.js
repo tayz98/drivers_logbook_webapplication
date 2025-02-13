@@ -7,7 +7,13 @@ async function handleCommonClickEvents() {
       console.log("Sidebar toggle clicked");
       const sidebar = document.querySelector(".sidebar");
       sidebar.classList.toggle("open");
+      if (sidebar.classList.contains("open")) {
+        document.body.classList.remove("sidebar-closed");
+      } else {
+        document.body.classList.add("sidebar-closed");
+      }
     }
+
     if (logoutButton) {
       handleLogout(e);
     }

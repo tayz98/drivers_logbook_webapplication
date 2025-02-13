@@ -241,7 +241,7 @@ router.delete(
     try {
       if (req.isAdminAuthenticated) {
         await Trip.deleteMany();
-        getIO().emit("tripsDeleted");
+        getIO().emit("allTripsDeleted");
         return res.json({ message: "All trips deleted from database" });
       } else if (res.trips) {
         for (let trip of res.trips) {
@@ -249,7 +249,7 @@ router.delete(
           await trip.save();
         }
         const tripIds = res.trips.map((trip) => trip._id);
-        getIO().emit("tripsMarkedAsDeleted", tripIds);
+        getIO().emit("tripsDeleted", tripIds);
         return res.json({ message: "Trips marked as deleted" });
       }
     } catch (error) {
@@ -261,17 +261,18 @@ router.delete(
 // deleting one trip by id
 router.delete(
   "/api/trip/:id",
-  authenticateAdminApiKey,
+  authenticateSessionOrApiKey,
   getTrip,
   async (req, res) => {
     try {
       if (req.isAdminAuthenticated) {
         await res.trip.deleteOne();
-        getIO().emit("tripDeleted", res.trip._id);
+        getIO().emit("tripsDeleted", [res.trip._id]);
         return res.json({ message: "Trip deleted from database" });
       } else {
         res.trip.markAsDeleted = true;
-        getIO().emit("tripsMarkedAsDeleted", [res.trip._id]);
+        await res.trip.save();
+        getIO().emit("tripsDeleted", [res.trip._id]);
         return res.json({ message: "Trip marked as deleted" });
       }
     } catch (error) {
@@ -305,18 +306,25 @@ async function getAllTrips(req, res, next) {
 router.post("/api/trips/merge", getAllTrips, async (req, res) => {
   try {
     const trips = res.trips;
-    // if (trips.some((trip) => tripStatus === "incorrect")) {
-    //   return res.status(403).json({
-    //     message: "You are not allowed to merge invalid trips!",
-    //   });
-    // }
+    if (trips.some((trip) => trip.tripStatus === "incorrect")) {
+      return res.status(403).json({
+        message: "You are not allowed to merge invalid trips!",
+      });
+    }
 
-    if (trips.some((trip) => !isTripEditableWithinSevenDays(trip))) {
+    if (
+      trips.some((trip) => !isTripEditableWithinSevenDays(trip.startTimestamp))
+    ) {
       return res.status(403).json({
         message: "You are not allowed to merge trips older than 7 days!",
       });
     }
     const mergedTrip = await mergeTrips(res.trips);
+    getIO().emit(
+      "tripsDeleted",
+      res.trips.map((trip) => trip._id)
+    );
+    getIO().emit("tripCreated", mergedTrip);
     res.status(201).json(mergedTrip);
   } catch (error) {
     res.status(400).json({ message: error.message });

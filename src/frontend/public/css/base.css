@@ -22,7 +22,6 @@
   transform: translateX(0);
 }
 
-
 .custom-header .brand {
   font-size: 2.5rem;
   font-weight: bold;
@@ -32,6 +31,11 @@
 
 body {
   font-family: "Open Sans", sans-serif;
+}
+
+body.sidebar-closed .main-content {
+  margin-left: 1rem;
+  transition: margin-left 0.3s ease;
 }
 
 .nav-link {
@@ -80,7 +84,7 @@ body {
   background: white;
 }
 
-.form-control-line-select:valid+label {
+.form-control-line-select:valid + label {
   transform: translateY(-1.5rem);
   font-size: 0.8rem;
   opacity: 0.8;
@@ -125,8 +129,8 @@ body {
   pointer-events: none;
 }
 
-.form-control-line:focus+label,
-.form-control-line:not(:placeholder-shown)+label {
+.form-control-line:focus + label,
+.form-control-line:not(:placeholder-shown) + label {
   transform: translateY(-1.5rem);
   font-size: 0.8rem;
   opacity: 0.8;
@@ -251,12 +255,10 @@ body {
   transform: translateX(0);
 }
 
-
-.sidebar:not(.open)~.main-content {
+/* .sidebar:not(.open) ~ .main-content {
   margin-left: 1rem;
   transition: 0.3s ease;
-}
-
+} */
 
 /* Responsive styles for screens smaller than 768px */
 @media (max-width: 768px) {
@@ -273,16 +275,11 @@ body {
     margin-left: 1rem;
   }
 
-
   .sidebar {
     transform: translateX(-100%);
     width: 200px;
   }
-
 }
-
-
-
 
 /* bootstrap-icons-1.5.0 */
 @font-face {
