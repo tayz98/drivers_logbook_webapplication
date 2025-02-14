@@ -1,0 +1,68 @@
+@BASE_URL = http://localhost/api
+
+
+### VEHICLE ROUTES ###
+
+POST {{BASE_URL}}/vehicle
+User-Agent: rest-client
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+{
+  "vin": "TMBZZZAAZGD640889"
+}
+
+###
+
+GET {{BASE_URL}}/vehicles
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+
+###
+
+
+### TRIP ROUTES ###
+
+GET {{BASE_URL}}/trips
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
+Content-Type: application/json
+
+###
+
+POST {{BASE_URL}}/trip
+Content-Type: application/json
+x-api-key: 198b1403fd6a8fd7ddc2d7cd5601fc5f44d68d63d6bd0af72492c683cf35b0aa
+
+{
+  "startTimestamp": "2025-02-04T22:54:00.000Z",
+  "endTimestamp": "2025-02-04T22:54:00.000Z",
+  "startLocation": null,
+  "endLocation": null,
+  "startMileage": "90",
+  "endMileage": "95",
+  "client": "",
+  "clientCompany": "",
+  "tripPurpose": "",
+  "tripCategory": "business",
+  "tripNotes": "",
+  "vehicle": {"vin": "TMBZZZAAZGD640889" },
+  "recorded": true,
+  "tripStatus": "incorrect",
+  "detourNote": "",
+  "checked": true
+}
+
+### USER ROUTES ###
+POST {{BASE_URL}}/user
+
+x-api-key: "ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758"
+Content-Type: "application/json"
+{
+  "username": "dispatcher",
+  "password": "password",
+  "firstName": "Max",
+  "lastName": "Mustermann",
+   "email": "max@gmail.com",
+   "role": "dispatcher"
+}
+
+###
