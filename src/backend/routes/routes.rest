@@ -1,41 +1,70 @@
+@BASE_URL = http://localhost/api
+
 
 ### TRIPS:
 
 
-GET http://localhost:80/api/trips
+GET {{BASE_URL}}/trips
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 
 ###
 
-GET http://localhost:80/api/trip/129
+GET {{BASE_URL}}/trip/129
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 ###
 
+POST {{BASE_URL}}/trip
+Content-Type: application/json
+x-api-key: 198b1403fd6a8fd7ddc2d7cd5601fc5f44d68d63d6bd0af72492c683cf35b0aa
 
+{
+  "startTimestamp": "2025-02-04T22:54:00.000Z",
+  "endTimestamp": "2025-02-04T22:54:00.000Z",
+  "startLocation": null,
+  "endLocation": null,
+  "startMileage": "90",
+  "endMileage": "95",
+  "client": "",
+  "clientCompany": "",
+  "tripPurpose": "",
+  "tripCategory": "business",
+  "tripNotes": "",
+  "vehicle": {"vin": "TMBZZZAAZGD640889" },
+  "recorded": true,
+  "tripStatus": "incorrect",
+  "detourNote": "",
+  "checked": true
+}
 
+###
 
+###
+
+DELETE {{BASE_URL}}/trip/128
+Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 
 ### VEHICLES:
 
-GET http://localhost:80/api/vehicles
+GET {{BASE_URL}}/vehicles
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 
 ###
-GET http://localhost:80/api/vehicle/TMBZZZAAZGD640887
+GET {{BASE_URL}}/vehicle/TMBZZZAAZGD640887
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 
 ###
 
-POST http://localhost:80/api/vehicle
+POST {{BASE_URL}}/vehicle
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
@@ -45,7 +74,7 @@ x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 ###
 
-PATCH http://localhost:80/api/vehicle/TMBZZZAAZGD640887
+PATCH {{BASE_URL}}/vehicle/TMBZZZAAZGD640887
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
@@ -55,21 +84,9 @@ x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 ###
 
-GET http://localhost:80/api/users
+GET {{BASE_URL}}/users
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
-
-
-###
-
-GET http://novacorp-fahrtenbuch.ipv64.net:1516/api/trips
-Content-Type: application/json
-x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
-
-###
-
-GET http://localhost:80/api/trips/679fb5fffdc0d9a905c8884f
-Content-Type: application/json
 
 
 ###
@@ -78,7 +95,7 @@ Content-Type: application/json
 
 ### USERS:
 
-POST http://localhost:80/api/user
+POST {{BASE_URL}}/user
 Content-Type: application/json
 x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
@@ -93,43 +110,20 @@ x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 ###
 
-POST http://localhost/api/login
+
+POST {{BASE_URL}}/user
 Content-Type: application/json
+x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
 {
-  "username": "dispatcher",
-  "password": "password"
+  "username": "admin",
+  "password": "einpasswort",
+  "firstName": "Gustav",
+  "lastName": "Müller",
+  "email": "Gustav.Müller@novacorp.com",
+  "role": "admin"
 }
 
-
-
 ###
 
-GET http://localhost:80/api/users
-x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758
 
-###
-
-GET http://localhost:3000/api/trip/15
-
-
-###
-GET http://novacorp-fahrtenbuch.ipv64.net:1516/api/trips/
-
-###
-
-POST http://localhost:3000/api/trip
-Content-Type: application/json
-
-
-
-###
-
-GET /api/vin-analyzer/analyze
-Content-Type: application/json
-
-
-###
-DELETE http://localhost:3000/api/trips
-Content-Type: application/json
-x-api-key: ef0dbe9cb1591983b808fc3cfc3f563069d4731a9c6963370f88026a2ef36758

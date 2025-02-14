@@ -63,8 +63,8 @@ module.exports = {
         const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
         const query = buildTripQuery(userRole, user);
         // IMPORTANT: Uncomment the following line to filter trips the user is allowed to see
-        // const trips = await Trip.find(query);
-        const trips = await Trip.find({ markAsDeleted: false });
+        const trips = await Trip.find(query);
+        // const trips = await Trip.find({ markAsDeleted: deletedTrips });
         socket.emit("trips", trips);
       });
 
@@ -137,11 +137,11 @@ module.exports = {
 
 function shouldEmitTrip(trip, user) {
   const userRole = user ? user.role : null;
-  if (trip.markAsDeleted === true) {
-    return false;
-  }
   if (userRole === "admin") {
     return true;
+  }
+  if (trip.markAsDeleted === true) {
+    return false;
   }
   if (userRole === "dispatcher" && trip.tripCategory === "business") {
     return true;

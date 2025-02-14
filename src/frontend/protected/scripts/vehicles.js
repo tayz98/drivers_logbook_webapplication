@@ -31,7 +31,6 @@ function handleSearchButtonClick(e) {
 }
 
 function handleAddTripButtonClick(e) {
-  console.log("Add trip button clicked");
   const card = e.target.closest(".card");
   if (!card) return;
 
@@ -48,7 +47,6 @@ function handleAddTripButtonClick(e) {
 }
 
 function handleEditButtonClick(e) {
-  console.log("Edit button clicked");
   const card = e.target.closest(".card");
   if (!card) return;
 

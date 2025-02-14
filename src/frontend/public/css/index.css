@@ -23,6 +23,10 @@
   font-weight: 500;
 }
 
+#report-container {
+  height: calc(100vh - var(--header-height));
+}
+
 #errorMsg {
   position: fixed;
   top: 90px;
@@ -30,6 +34,17 @@
   right: 0;
   z-index: 1100;
   padding: 0 1rem;
+}
+
+#reportErrorMsg {
+  position: fixed;
+  top: 90px;
+  left: calc(250px);
+  right: 0;
+  z-index: 1100;
+  max-width: calc(100% - 250px - 4rem);
+  padding: 0 1rem;
+  margin: 0 auto;
 }
 
 #togglePassword {

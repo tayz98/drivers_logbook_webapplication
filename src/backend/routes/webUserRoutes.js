@@ -103,6 +103,7 @@ router.post("/api/login", async (req, res) => {
       vehicleId: user.vehicleId,
     };
     console.log("Session set: ", req.session);
+    console.log("User logged in: ", req.session.user);
 
     return res.redirect("/");
   } catch (error) {

@@ -49,6 +49,20 @@ router.get("/vehicles", isAuthenticated, (req, res) => {
   );
 });
 
+router.get("/report", isAuthenticated, (req, res) => {
+  return res.sendFile(
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "frontend",
+      "protected",
+      "pages",
+      "report.html"
+    )
+  );
+});
+
 router.get("/flutter_logs", (req, res) => {
   return res.sendFile(
     path.join(

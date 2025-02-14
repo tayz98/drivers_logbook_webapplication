@@ -3,7 +3,7 @@ const { formatDate } = require("../utility");
 
 function buildTripQuery(userRole, user) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const query = {
+  let query = {
     startTimestamp: { $gte: thirtyDaysAgo },
     $or: [{ markAsDeleted: false }, { markAsDeleted: { $exists: false } }],
   };
@@ -16,6 +16,7 @@ function buildTripQuery(userRole, user) {
       query.vehicleId = user.vehicleId;
       break;
     case "admin":
+      query = {};
       break;
     default:
       console.error("Unknown user role:", userRole);
@@ -91,7 +92,7 @@ async function mergeTrips(trips) {
  * @param {String} fromDateStr - User-selected start date (ISO 8601 string).
  * @param {String} toDateStr   - User-selected end date (ISO 8601 string).
  */
-async function getTripsWithinPeriod(fromDateStr, toDateStr) {
+async function generateReportData(fromDateStr, toDateStr) {
   const fromDate = new Date(fromDateStr);
   const toDate = new Date(toDateStr);
 
@@ -135,7 +136,15 @@ async function getTripsWithinPeriod(fromDateStr, toDateStr) {
             // If condition is true, remove the field entirely
             "$$REMOVE",
             // Otherwise, keep the original field
-            "$startLocation",
+            {
+              $concat: [
+                "$startLocation.street",
+                ", ",
+                { $toString: "$startLocation.postalCode" },
+                " ",
+                "$startLocation.city",
+              ],
+            },
           ],
         },
         endLocation: {
@@ -147,25 +156,37 @@ async function getTripsWithinPeriod(fromDateStr, toDateStr) {
               ],
             },
             "$$REMOVE",
-            "$endLocation",
+            {
+              $concat: [
+                "$endLocation.street",
+                ", ",
+                { $toString: "$endLocation.postalCode" },
+                " ",
+                "$endLocation.city",
+              ],
+            },
           ],
         },
 
         // Always include these fields
-        startTimestamp: 1,
-        endTimestamp: 1,
+        Date: {
+          $dateToString: { format: "%d.%m.%Y", date: "$startTimestamp" },
+        },
         startMileage: 1,
         endMileage: 1,
         tripCategory: 1,
         tripPurpose: 1,
         tripNotes: 1,
+        markAsDeleted: 1,
+        clientCompany: 1,
+        client: 1,
         detourNote: 1,
         // Compute kilometers
         kilometers: { $subtract: ["$endMileage", "$startMileage"] },
         // Pull out licensePlate from the joined vehicle data
         licensePlate: "$vehicleData.licensePlate",
         // Optionally exclude any internal fields like _id or __v if not needed
-        _id: 0,
+        _id: 1,
       },
     },
   ]);
@@ -173,4 +194,4 @@ async function getTripsWithinPeriod(fromDateStr, toDateStr) {
   return tripsForExport;
 }
 
-module.exports = { mergeTrips, buildTripQuery, getTripsWithinPeriod };
+module.exports = { mergeTrips, buildTripQuery, generateReportData };

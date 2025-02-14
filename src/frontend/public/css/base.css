@@ -2,6 +2,14 @@
   --header-height: 80px;
 }
 
+.btn[disabled],
+.btn:disabled {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+}
+
 .custom-header {
   background-color: #2d3441;
   color: white;
@@ -29,6 +37,7 @@
   margin: 0;
 }
 
+html,
 body {
   font-family: "Open Sans", sans-serif;
 }
@@ -55,7 +64,7 @@ body.sidebar-closed .main-content {
 }
 
 .form-control {
-  padding-right: 2.5rem;
+  padding-right: 1.5rem;
 }
 
 .custom-body {

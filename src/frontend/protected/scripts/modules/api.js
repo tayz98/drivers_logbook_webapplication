@@ -233,3 +233,28 @@ async function mergeTrips(tripIds) {
     console.error("Error:", error);
   }
 }
+
+async function generateReport(fromDate, toDate) {
+  try {
+    // Wir erwarten, dass fromDate und toDate Strings im ISO-Format (oder anderen) sind.
+    const url = `/api/report?fromDate=${encodeURIComponent(
+      fromDate
+    )}&toDate=${encodeURIComponent(toDate)}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error generating report:", errorData);
+      return;
+    }
+    console.log("Report generated:", response);
+    return response;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}

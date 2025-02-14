@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Trip = require("../models/tripSchema");
 const Vehicle = require("../models/vehicleSchema");
-const { mergeTrips } = require("../services/tripService");
+const { mergeTrips, generateReportData } = require("../services/tripService");
 const { formatDate } = require("../utility");
 const WebUser = require("../models/webUserSchema");
 const mongoose = require("mongoose");
@@ -333,13 +333,13 @@ router.post("/api/trips/merge", getAllTrips, async (req, res) => {
 
 // for export
 // TODO: check later, add authentication etc.
-router.get("/api/trips/range", async (req, res) => {
+router.get("/api/report", async (req, res) => {
   try {
     // user provides ?fromDate=...&toDate=... as query parameters
     const { fromDate, toDate } = req.query;
     // Validate query parameters if needed
 
-    const trips = await getTripsWithinPeriod(fromDate, toDate);
+    const trips = await generateReportData(fromDate, toDate);
     return res.json(trips);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -4,7 +4,6 @@ async function handleCommonClickEvents() {
     const sidebarToggle = e.target.closest("#sidebarToggle");
 
     if (sidebarToggle) {
-      console.log("Sidebar toggle clicked");
       const sidebar = document.querySelector(".sidebar");
       sidebar.classList.toggle("open");
       if (sidebar.classList.contains("open")) {

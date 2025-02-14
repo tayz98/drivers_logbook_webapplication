@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaCorp - Fahrtenbuch</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="/css/base.css" rel="stylesheet" />
+    <link href="/css/index.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  </head>
+
+  <body class="custom-body">
+    <div id="header-container"></div>
+    <div id="sidebar-container"></div>
+    <!-- HAUPTBEREICH -->
+    <main
+      class="d-flex align-items-center justify-content-center"
+      id="report-container"
+    >
+      <div class="card shadow p-4 custom-card">
+        <h3 class="text-center mb-3">Bericht erstellen</h3>
+
+        <div id="reportErrorMsg" class="w-100 mb-3"></div>
+
+        <form id="reportForm">
+          <div class="mb-4">
+            <label for="startDate" class="form-label">Startdatum</label>
+            <input
+              type="date"
+              class="form-control"
+              id="startDate"
+              name="startDate"
+              required
+            />
+          </div>
+          <div class="mb-4">
+            <label for="endDate" class="form-label">Enddatum</label>
+            <input
+              type="date"
+              class="form-control"
+              id="endDate"
+              name="endDate"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-100 custom-login-button"
+            id="reportButton"
+            disabled
+          >
+            Bestätigen
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <script src="/scripts/libraries/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/modules/domUtils.js"></script>
+    <script src="/protected/scripts/modules/utils.js"></script>
+    <script src="/protected/scripts/modules/api.js"></script>
+    <script src="/protected/scripts/modules/commonEventHandlers.js"></script>
+    <script src="/protected/scripts/report.js" defer></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadHTML("#header-container", "/templates/header.html");
+        await loadHTML("#sidebar-container", "/templates/sidebar.html");
+        fetchUserAndSessionInfo();
+        handleCommonClickEvents();
+      });
+    </script>
+    <script src="http://localhost:1516/livereload.js?snipver=1"></script>
+  </body>
+</html>
