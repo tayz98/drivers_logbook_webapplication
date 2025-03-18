@@ -1,18 +1,17 @@
 const mongoose = require("mongoose");
-
 const locationSchema = new mongoose.Schema(
   {
     street: {
       type: String,
-      required: true,
+      required: false,
     },
     city: {
       type: String,
-      required: true,
+      required: false,
     },
     postalCode: {
       type: String,
-      required: true,
+      required: false,
     },
     latitude: {
       type: Number,

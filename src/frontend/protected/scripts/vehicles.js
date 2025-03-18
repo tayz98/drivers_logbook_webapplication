@@ -271,13 +271,19 @@ async function displayVehicles(vehicles) {
       <div class="col-auto">
         <div class="card shadow-sm mb-2 compact-card"
              data-id="${vehicle._id}"
-             data-custom-name="${vehicle.customName ?? "Unbekannt"}"
-             data-manufacturer="${vehicle.manufacturer ?? "Unbekannt"}"
-             data-model="${vehicle.model ?? "Unbekannt"}"
-             data-year="${vehicle.year ?? "Unbekannt"}"
-            data-license-plate="${vehicle.licensePlate ?? "Unbekannt"}">
+             data-custom-name="${
+               vehicle.customName.trim() !== ""
+                 ? vehicle.customName
+                 : vehicle._id
+             }"
+             data-manufacturer="${vehicle.manufacturer ?? ""}"
+             data-model="${vehicle.model ?? ""}"
+             data-year="${vehicle.year ?? ""}"
+            data-license-plate="${vehicle.licensePlate ?? ""}">
           <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center bg-primary text-white">
-            <h6 class="mb-0 small">${vehicle.customName ?? "Unbekannt"}</h6>
+<h6 class="mb-0 small">${
+      vehicle.customName.trim() !== "" ? vehicle.customName : vehicle._id
+    }</h6>
             <div>
                               <button
                     class="btn btn-link p-0 text-white add-trip-button"
@@ -304,20 +310,16 @@ async function displayVehicles(vehicles) {
               <dd class="col-7 small vin">${vehicle._id}</dd>
 
               <dt class="col-5 small text-muted">Hersteller:</dt>
-              <dd class="col-7 small">${
-                vehicle.manufacturer ?? "Unbekannt"
-              }</dd>
+              <dd class="col-7 small">${vehicle.manufacturer ?? ""}</dd>
 
               <dt class="col-5 small text-muted">Modell:</dt>
-              <dd class="col-7 small">${vehicle.model ?? "Unbekannt"}</dd>
+              <dd class="col-7 small">${vehicle.model ?? ""}</dd>
 
               <dt class="col-5 small text-muted">Jahr:</dt>
-              <dd class="col-7 small">${vehicle.year ?? "Unbekannt"}</dd>
+              <dd class="col-7 small">${vehicle.year ?? ""}</dd>
               
               <dt class="col-5 small text-muted">Kennzeichen:</dt>
-              <dd class="col-7 small">${
-                vehicle.licensePlate ?? "Unbekannt"
-              }</dd>
+              <dd class="col-7 small">${vehicle.licensePlate ?? ""}</dd>
             </dl>
           </div>
         </div>

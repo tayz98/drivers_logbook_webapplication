@@ -25,6 +25,7 @@
 
 #report-container {
   height: calc(100vh - var(--header-height));
+  margin-left: 250px;
 }
 
 #errorMsg {

@@ -23,9 +23,12 @@
     "express-session": "^1.18.1",
     "mobx": "^6.13.6",
     "mongoose": "^8.9.5",
+    "mongoose-schema-jsonschema": "^3.0.2",
     "mongoose-sequence": "^6.0.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tail-file": "^1.4.16",
     "uuid": "^11.0.5",
     "winston": "^3.17.0"

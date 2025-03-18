@@ -11,6 +11,20 @@ const THROTTLE_INTERVAL = 100; // ms
 const connections = new Set();
 router.use(express.json());
 
+/**
+ * @swagger
+ * /stream_flutter_logs:
+ *   get:
+ *     summary: Streams flutter logs via Server-Sent Events.
+ *     description: Reads the last 100 log entries from the log file and streams new log entries as JSON batches.
+ *     tags:
+ *       - Flutter Logs
+ *     produces:
+ *       - text/event-stream
+ *     responses:
+ *       200:
+ *         description: Event stream containing log data.
+ */
 router.get("/stream_flutter_logs", async (req, res) => {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -84,6 +98,36 @@ router.get("/stream_flutter_logs", async (req, res) => {
   req.on("end", cleanup);
 });
 
+/**
+ * @swagger
+ * /api/flutter_logs:
+ *   post:
+ *     summary: Saves a new flutter log entry.
+ *     description: Appends the provided JSON log data as a new line to the log file.
+ *     tags:
+ *       - Flutter Logs
+ *     requestBody:
+ *       description: JSON object containing the log data.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Log saved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Empty request body.
+ *       500:
+ *         description: Failed to save log.
+ */
 router.post("/api/flutter_logs", (req, res) => {
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).json({ error: "Empty request body" });

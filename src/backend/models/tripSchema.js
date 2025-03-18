@@ -35,7 +35,7 @@ const tripSchema = new mongoose.Schema({
   },
   endTimestamp: {
     type: Date,
-    required: true,
+    required: false,
   },
   startMileage: {
     type: Number,
@@ -92,7 +92,7 @@ const tripSchema = new mongoose.Schema({
   vehicleId: {
     type: String,
     ref: "Vehicle",
-    required: true,
+    required: false,
     validate: {
       validator: async (vehicleId) => {
         const vehicle = await Vehicle.exists({ _id: vehicleId });

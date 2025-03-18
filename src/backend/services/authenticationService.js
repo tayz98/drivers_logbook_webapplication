@@ -50,8 +50,10 @@ function authenticateSessionOrApiKey(req, res, next) {
   }
   if (apiKey === ADMIN_API_KEY) {
     req.isAdminAuthenticated = true;
+    console.log("Admin is authenticated");
   } else {
     req.isDriverAuthenticated = true;
+    console.log("Driver is authenticated");
   }
   req.isAuthenticatedByAnyKey = true;
   next();

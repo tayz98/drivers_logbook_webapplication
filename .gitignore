@@ -5,3 +5,4 @@ src/middleware/logs
 .env
 *.log
 */logs
+src/backend/routes/routes.rest

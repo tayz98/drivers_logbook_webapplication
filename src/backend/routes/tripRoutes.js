@@ -15,6 +15,32 @@ const {
   authenticateSessionOrApiKey,
 } = require("../services/authenticationService");
 
+/**
+ * @swagger
+ * /api/trips:
+ *   get:
+ *     summary: Retrieves trips.
+ *     description: Returns a list of trips. Admins can view all trips. managers can only view their own vehicle's trips. dispatchers can view all business trips.
+ *     tags:
+ *       - Trips
+ *     parameters:
+ *       - in: query
+ *         name: vehicleId
+ *         schema:
+ *           type: string
+ *         description: Optional filter for vehicle ID.
+ *     security:
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of trips.
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden.
+ *       500:
+ *         description: Server error.
+ */
 router.get(
   "/api/trips",
   authenticateSessionOrApiKey,
@@ -74,7 +100,31 @@ router.get(
   }
 );
 
-// getting one trip by id
+/**
+ * @swagger
+ * /api/trip/{id}:
+ *   get:
+ *     summary: Retrieves a specific trip.
+ *     description: Returns a trip identified by its ID.
+ *     tags:
+ *       - Trips
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Trip ID.
+ *     security:
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: A single trip.
+ *       404:
+ *         description: Trip not found.
+ *       500:
+ *         description: Server error.
+ */
 router.get(
   "/api/trip/:id",
   getTrip,
@@ -99,8 +149,92 @@ async function getTrip(req, res, next) {
   next();
 }
 
+/**
+ * @swagger
+ * /api/trip:
+ *   post:
+ *     summary: Creates a new trip.
+ *     description: Creates a new trip entry.
+ *     tags:
+ *       - Trips
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startLocation:
+ *                 type: string
+ *               endLocation:
+ *                 type: string
+ *               startTimestamp:
+ *                 type: string
+ *                 format: date-time
+ *               endTimestamp:
+ *                 type: string
+ *                 format: date-time
+ *               startMileage:
+ *                 type: number
+ *               endMileage:
+ *                 type: number
+ *               tripCategory:
+ *                 type: string
+ *               tripPurpose:
+ *                 type: string
+ *               tripNotes:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               tripStatus:
+ *                 type: string
+ *               recorded:
+ *                 type: boolean
+ *               vehicle:
+ *                 type: object
+ *                 properties:
+ *                   vin:
+ *                     type: string
+ *                   manufacturer:
+ *                     type: string
+ *                   year:
+ *                     type: number
+ *                   region:
+ *                     type: string
+ *     responses:
+ *       201:
+ *         description: Trip created successfully.
+ *       400:
+ *         description: Bad request.
+ *       500:
+ *         description: Server error.
+ */
 router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
   const timestamp = formatDate(new Date());
+  let startTimestamp = null;
+  let endTimestamp = null;
+  if (req.body.startTimestamp) {
+    const num = Number(req.body.startTimestamp);
+    if (isNaN(num)) {
+      console.log("Invalid startTimestamp:", req.body.startTimestamp);
+      return res.status(400).json({ message: "Invalid startTimestamp" });
+    }
+    startTimestamp = new Date(num);
+    console.log("Parsed startTimestamp:", startTimestamp);
+  } else {
+    startTimestamp = null;
+  }
+  if (req.body.endTimestamp) {
+    const numEnd = Number(req.body.endTimestamp);
+    if (isNaN(numEnd)) {
+      console.log("Invalid startTimestamp:", req.body.startTimestamp);
+      return res.status(400).json({ message: "Invalid startTimestamp" });
+    }
+    endTimestamp = new Date(numEnd);
+    console.log("Parsed endTimestamp:", endTimestamp);
+  } else {
+    endTimestamp = null;
+  }
   console.log(req.body);
   let vehicleId;
   if (req.body.vehicle && req.body.vehicle.vin !== "") {
@@ -130,12 +264,15 @@ router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
   const trip = new Trip({
     startLocation: req.body.startLocation,
     endLocation: req.body.endLocation,
-    startTimestamp: req.body.startTimestamp,
-    endTimestamp: req.body.endTimestamp,
+    startTimestamp: startTimestamp,
+    endTimestamp: endTimestamp,
     startMileage: req.body.startMileage,
     endMileage: req.body.endMileage,
     tripCategory: req.body.tripCategory,
     tripPurpose: req.body.tripPurpose,
+    clientCompany: req.body.clientCompany,
+    client: req.body.client,
+    detourNote: req.body.detourNote,
     tripNotes: req.body.tripNotes,
     tripStatus: req.body.tripStatus,
     vehicleId: vehicleId,
@@ -157,7 +294,51 @@ router.post("/api/trip", authenticateSessionOrApiKey, async (req, res) => {
   }
 });
 
-// updating one trip by id
+/**
+ * @swagger
+ * /api/trip/{id}:
+ *   patch:
+ *     summary: Updates a trip.
+ *     description: Updates an existing trip. Editing is allowed only if the trip is within the permitted time span.
+ *     tags:
+ *       - Trips
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Trip ID.
+ *     requestBody:
+ *       description: Trip data to update.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tripNotes:
+ *                 type: string
+ *               clientCompany:
+ *                 type: string
+ *               client:
+ *                 type: string
+ *               detourNote:
+ *                 type: string
+ *               tripCategory:
+ *                 type: string
+ *               tripPurpose:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Trip updated successfully.
+ *       400:
+ *         description: Bad request.
+ *       403:
+ *         description: Editing not allowed.
+ *       500:
+ *         description: Server error.
+ */
 router.patch(
   "/api/trip/:id",
   getTrip,
@@ -232,10 +413,39 @@ function formatCategory(category) {
   }
 }
 
-// delete multiple trips at once
+/**
+ * @swagger
+ * /api/trips:
+ *   delete:
+ *     summary: Deletes multiple trips.
+ *     description: Deletes (or marks as deleted) multiple trips by trip IDs. Requires admin API key for full deletion.
+ *     tags:
+ *       - Trips
+ *     security:
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       description: Object with an array of trip IDs.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tripIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Trips deleted or marked as deleted.
+ *       400:
+ *         description: No trip IDs provided.
+ *       500:
+ *         description: Server error.
+ */
 router.delete(
   "/api/trips",
-  authenticateAdminApiKey,
+  authenticateSessionOrApiKey,
   getAllTrips,
   async (req, res) => {
     try {
@@ -258,7 +468,29 @@ router.delete(
   }
 );
 
-// deleting one trip by id
+/**
+ * @swagger
+ * /api/trip/{id}:
+ *   delete:
+ *     summary: Deletes a trip.
+ *     description: Deletes (or marks as deleted) a specific trip. Admins delete permanently.
+ *     tags:
+ *       - Trips
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Trip ID.
+ *     security:
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Trip deleted or marked as deleted.
+ *       500:
+ *         description: Server error.
+ */
 router.delete(
   "/api/trip/:id",
   authenticateSessionOrApiKey,
@@ -282,9 +514,15 @@ router.delete(
 );
 
 // middleware
-// TODO test if working
 async function getAllTrips(req, res, next) {
+  console.log("Getting all trips");
   try {
+    if (req.isAdminAuthenticated) {
+      console.log("Admin API Key Authentication successful");
+      const trips = await Trip.find();
+      res.trips = trips;
+      return next();
+    }
     const tripIds = req.body.tripIds;
     if (!tripIds) {
       return res.status(400).json({ message: "No trip ids provided." });
@@ -302,7 +540,34 @@ async function getAllTrips(req, res, next) {
   }
 }
 
-// TODO:
+/**
+ * @swagger
+ * /api/trips/merge:
+ *   post:
+ *     summary: Merges multiple trips.
+ *     description: Merges the trips specified by an array of trip IDs. All trips must be editable and valid.
+ *     tags:
+ *       - Trips
+ *     requestBody:
+ *       description: Object containing an array of trip IDs.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tripIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Trips merged successfully.
+ *       400:
+ *         description: Bad request.
+ *       403:
+ *         description: Forbidden merge.
+ */
 router.post("/api/trips/merge", getAllTrips, async (req, res) => {
   try {
     const trips = res.trips;
@@ -331,8 +596,37 @@ router.post("/api/trips/merge", getAllTrips, async (req, res) => {
   }
 });
 
-// for export
-// TODO: check later, add authentication etc.
+/**
+ * @swagger
+ * /api/report:
+ *   get:
+ *     summary: Generates a trip report.
+ *     description: Generates a report based on a date range provided as query parameters.
+ *     tags:
+ *       - Trips
+ *     parameters:
+ *       - in: query
+ *         name: fromDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date.
+ *       - in: query
+ *         name: toDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date.
+ *     responses:
+ *       200:
+ *         description: Report data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *       500:
+ *         description: Server error.
+ */
 router.get("/api/report", async (req, res) => {
   try {
     // user provides ?fromDate=...&toDate=... as query parameters

@@ -264,11 +264,11 @@ function generatePDFFromJSON(data) {
     );
     totalsY += 7;
     doc.text(
-      `Davon: privat: ${vehicleTotals.privat.toLocaleString(
+      `privat: ${vehicleTotals.privat.toLocaleString(
         "de-DE"
       )} km, Arbeitsweg: ${vehicleTotals.arbeitsweg.toLocaleString(
         "de-DE"
-      )} km, Dienstlich: ${vehicleTotals.dienstlich.toLocaleString(
+      )} km, dienstlich: ${vehicleTotals.dienstlich.toLocaleString(
         "de-DE"
       )} km`,
       14,
@@ -278,7 +278,7 @@ function generatePDFFromJSON(data) {
 
   doc.addPage();
   doc.setFontSize(12);
-  doc.text("Gesamte Fahrten aller Fahrzeuge", 14, 15);
+  doc.text("Alle Fahrten aller Fahrzeuge", 14, 15);
   doc.setFontSize(10);
   doc.text(
     `Gesamtkilometer: ${overallTotals.all.toLocaleString("de-DE")} km`,
@@ -286,11 +286,11 @@ function generatePDFFromJSON(data) {
     25
   );
   doc.text(
-    `Davon: privat: ${overallTotals.privat.toLocaleString(
+    `privat: ${overallTotals.privat.toLocaleString(
       "de-DE"
     )} km, Arbeitsweg: ${overallTotals.arbeitsweg.toLocaleString(
       "de-DE"
-    )} km, Dienstlich: ${overallTotals.dienstlich.toLocaleString("de-DE")} km`,
+    )} km, dienstlich: ${overallTotals.dienstlich.toLocaleString("de-DE")} km`,
     14,
     35
   );

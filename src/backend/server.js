@@ -93,6 +93,7 @@ liveReloadServer.server.on("connection", (socket) => {
 liveReloadServer.watch(path.join(__dirname, "..", "frontend", "public"));
 liveReloadServer.watch(path.join(__dirname, "..", "frontend", "protected"));
 liveReloadServer.watch(path.join(__dirname, "..", "frontend", "models"));
+// process.env.TZ = "Europe/Berlin";
 
 // // Error Middleware
 app.use(errorMiddleware);

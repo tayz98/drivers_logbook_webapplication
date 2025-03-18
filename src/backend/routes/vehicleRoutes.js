@@ -10,7 +10,32 @@ const { loadUser } = require("../middleware/userMiddleware");
 const WebUser = require("../models/webUserSchema");
 const { getIO } = require("../websocket");
 
-// getting all vehicles
+/**
+ * @swagger
+ * /api/vehicles:
+ *   get:
+ *     summary: Retrieves all vehicles.
+ *     description: Returns a list of vehicles. For admin users, all vehicles are returned; for managers and dispatchers, a filtered list is provided.
+ *     tags:
+ *       - Vehicles
+ *     security:
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of vehicles.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Vehicle'
+ *       401:
+ *         description: Unauthorized access.
+ *       404:
+ *         description: No vehicles found or no vehicle assigned.
+ *       500:
+ *         description: Server error.
+ */
 router.get(
   "/api/vehicles",
   authenticateSessionOrApiKey,
@@ -62,7 +87,35 @@ router.get(
   }
 );
 
-// getting one vehicle by id
+/**
+ * @swagger
+ * /api/vehicle/{id}:
+ *   get:
+ *     summary: Retrieves a vehicle by ID.
+ *     description: Returns the vehicle data corresponding to the given ID.
+ *     tags:
+ *       - Vehicles
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The vehicle ID.
+ *     security:
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Vehicle data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Vehicle'
+ *       404:
+ *         description: Vehicle not found.
+ *       500:
+ *         description: Server error.
+ */
 router.get(
   "/api/vehicle/:id",
   getVehicle,
@@ -72,7 +125,45 @@ router.get(
   }
 );
 
-// creating a vehicle
+/**
+ * @swagger
+ * /api/vehicle:
+ *   post:
+ *     summary: Creates a new vehicle.
+ *     description: Adds a new vehicle to the database.
+ *     tags:
+ *       - Vehicles
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               vin:
+ *                 type: string
+ *               brand:
+ *                 type: string
+ *               model:
+ *                 type: string
+ *               year:
+ *                 type: number
+ *               licensePlate:
+ *                 type: string
+ *             required:
+ *               - vin
+ *     responses:
+ *       201:
+ *         description: Vehicle created.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Vehicle'
+ *       400:
+ *         description: Vehicle already exists or validation error.
+ *       500:
+ *         description: Server error.
+ */
 router.post("/api/vehicle", async (req, res) => {
   console.log(req.body);
   if (req.body.vin != null) {
@@ -97,33 +188,97 @@ router.post("/api/vehicle", async (req, res) => {
   }
 });
 
-// updating one vehicle by id
+/**
+ * @swagger
+ * /api/vehicle/{id}:
+ *   patch:
+ *     summary: Updates a vehicle.
+ *     description: Updates vehicle data based on the provided ID.
+ *     tags:
+ *       - Vehicles
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The vehicle ID.
+ *     requestBody:
+ *       description: The vehicle data to update.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               brand:
+ *                 type: string
+ *               customName:
+ *                 type: string
+ *               manufacturer:
+ *                 type: string
+ *               model:
+ *                 type: string
+ *               year:
+ *                 type: number
+ *               licensePlate:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Vehicle'
+ *       400:
+ *         description: Validation error.
+ *       500:
+ *         description: Server error.
+ */
 router.patch(
   "/api/vehicle/:id",
   getVehicle,
   authenticateSessionOrApiKey,
   async (req, res) => {
     console.log(req.body);
-    if (req.body.brand != null) {
-      res.vehicle.brand = req.body.brand;
+
+    // Erstelle ein Update-Objekt
+    const updateData = {};
+
+    if (req.body.brand !== undefined) {
+      updateData.brand = req.body.brand;
     }
-    if (req.body.customName != null) {
-      res.vehicle.customName = req.body.customName;
+    if (req.body.customName !== undefined) {
+      updateData.customName = req.body.customName;
     }
-    if (req.body.manufacturer != null) {
-      res.vehicle.manufacturer = req.body.manufacturer;
+    if (req.body.manufacturer !== undefined) {
+      updateData.manufacturer = req.body.manufacturer;
     }
-    if (req.body.model != null) {
-      res.vehicle.model = req.body.model;
+    if (req.body.model !== undefined) {
+      updateData.model = req.body.model;
     }
-    if (req.body.year != null) {
-      res.vehicle.year = req.body.year;
+    if (req.body.year !== undefined) {
+      if (req.body.year === null) {
+        updateData.$unset = { year: "" }; // Entfernt das Feld
+      } else {
+        updateData.year = req.body.year;
+      }
     }
-    if (req.body.licensePlate != null) {
-      res.vehicle.licensePlate = req.body.licensePlate;
+    if (req.body.licensePlate !== undefined) {
+      updateData.licensePlate = req.body.licensePlate;
     }
+
     try {
-      const updatedVehicle = await res.vehicle.save();
+      const updatedVehicle = await Vehicle.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true } // Gibt das aktualisierte Dokument zurück
+      );
+
+      if (!updatedVehicle) {
+        return res.status(404).json({ message: "Vehicle not found" });
+      }
+
       getIO().emit("vehicleUpdated", updatedVehicle);
       res.json(updatedVehicle);
     } catch (error) {
@@ -132,7 +287,22 @@ router.patch(
   }
 );
 
-// delete all vehicle from the database
+/**
+ * @swagger
+ * /api/vehicles:
+ *   delete:
+ *     summary: Deletes all vehicles.
+ *     description: Removes all vehicles from the database. Requires admin API key.
+ *     tags:
+ *       - Vehicles
+ *     security:
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: All vehicles deleted.
+ *       500:
+ *         description: Server error.
+ */
 router.delete("/api/vehicles", authenticateAdminApiKey, async (req, res) => {
   try {
     await Vehicle.deleteMany();
@@ -142,7 +312,29 @@ router.delete("/api/vehicles", authenticateAdminApiKey, async (req, res) => {
   }
 });
 
-// deleting one vehicle by id
+/**
+ * @swagger
+ * /api/vehicle/{id}:
+ *   delete:
+ *     summary: Deletes a vehicle.
+ *     description: Removes a vehicle by ID. Requires admin API key.
+ *     tags:
+ *       - Vehicles
+ *     security:
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The vehicle ID.
+ *     responses:
+ *       200:
+ *         description: Vehicle deleted successfully.
+ *       500:
+ *         description: Server error.
+ */
 router.delete(
   "/api/vehicle/:id",
   authenticateAdminApiKey,

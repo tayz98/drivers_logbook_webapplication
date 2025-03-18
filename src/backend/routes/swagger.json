@@ -1,0 +1,1178 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Drivers Logbook Web Application API",
+    "version": "1.0.0",
+    "description": "API documentation for the Drivers Logbook Web Application."
+  },
+  "servers": [
+    {
+      "url": "http://localhost/",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/stream_flutter_logs": {
+      "get": {
+        "summary": "Streams flutter logs via Server-Sent Events.",
+        "description": "Reads the last 100 log entries from the log file and streams new log entries as JSON batches.",
+        "tags": [
+          "Flutter Logs"
+        ],
+        "produces": [
+          "text/event-stream"
+        ],
+        "responses": {
+          "200": {
+            "description": "Event stream containing log data."
+          }
+        }
+      }
+    },
+    "/api/flutter_logs": {
+      "post": {
+        "summary": "Saves a new flutter log entry.",
+        "description": "Appends the provided JSON log data as a new line to the log file.",
+        "tags": [
+          "Flutter Logs"
+        ],
+        "requestBody": {
+          "description": "JSON object containing the log data.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Log saved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Empty request body."
+          },
+          "500": {
+            "description": "Failed to save log."
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Serves the web portal.",
+        "description": "Returns the dashboard if a session exists; otherwise, returns the login page.",
+        "tags": [
+          "Static Pages"
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML file delivered."
+          }
+        }
+      }
+    },
+    "/vehicles": {
+      "get": {
+        "summary": "Serves the vehicles page.",
+        "description": "Returns the vehicles HTML page. Authentication is required.",
+        "tags": [
+          "Static Pages"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML file for the vehicles page."
+          }
+        }
+      }
+    },
+    "/report": {
+      "get": {
+        "summary": "Serves the report page.",
+        "description": "Returns the report HTML page. Authentication is required.",
+        "tags": [
+          "Static Pages"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML file for the report page."
+          }
+        }
+      }
+    },
+    "/flutter_logs": {
+      "get": {
+        "summary": "Serves the flutter logs page.",
+        "description": "Returns the HTML page for flutter logs.",
+        "tags": [
+          "Static Pages"
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML file for the flutter logs page."
+          }
+        }
+      }
+    },
+    "/api/trips": {
+      "get": {
+        "summary": "Retrieves trips.",
+        "description": "Returns a list of trips. Admins can view all trips. managers can only view their own vehicle's trips. dispatchers can view all business trips.",
+        "tags": [
+          "Trips"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "vehicleId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional filter for vehicle ID."
+          }
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of trips."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "Forbidden."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes multiple trips.",
+        "description": "Deletes (or marks as deleted) multiple trips by trip IDs. Requires admin API key for full deletion.",
+        "tags": [
+          "Trips"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Object with an array of trip IDs.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tripIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trips deleted or marked as deleted."
+          },
+          "400": {
+            "description": "No trip IDs provided."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/trip/{id}": {
+      "get": {
+        "summary": "Retrieves a specific trip.",
+        "description": "Returns a trip identified by its ID.",
+        "tags": [
+          "Trips"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Trip ID."
+          }
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single trip."
+          },
+          "404": {
+            "description": "Trip not found."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      },
+      "patch": {
+        "summary": "Updates a trip.",
+        "description": "Updates an existing trip. Editing is allowed only if the trip is within the permitted time span.",
+        "tags": [
+          "Trips"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Trip ID."
+          }
+        ],
+        "requestBody": {
+          "description": "Trip data to update.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tripNotes": {
+                    "type": "string"
+                  },
+                  "clientCompany": {
+                    "type": "string"
+                  },
+                  "client": {
+                    "type": "string"
+                  },
+                  "detourNote": {
+                    "type": "string"
+                  },
+                  "tripCategory": {
+                    "type": "string"
+                  },
+                  "tripPurpose": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trip updated successfully."
+          },
+          "400": {
+            "description": "Bad request."
+          },
+          "403": {
+            "description": "Editing not allowed."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes a trip.",
+        "description": "Deletes (or marks as deleted) a specific trip. Admins delete permanently.",
+        "tags": [
+          "Trips"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Trip ID."
+          }
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trip deleted or marked as deleted."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/trip": {
+      "post": {
+        "summary": "Creates a new trip.",
+        "description": "Creates a new trip entry.",
+        "tags": [
+          "Trips"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "startLocation": {
+                    "type": "string"
+                  },
+                  "endLocation": {
+                    "type": "string"
+                  },
+                  "startTimestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endTimestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "startMileage": {
+                    "type": "number"
+                  },
+                  "endMileage": {
+                    "type": "number"
+                  },
+                  "tripCategory": {
+                    "type": "string"
+                  },
+                  "tripPurpose": {
+                    "type": "string"
+                  },
+                  "tripNotes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "tripStatus": {
+                    "type": "string"
+                  },
+                  "recorded": {
+                    "type": "boolean"
+                  },
+                  "vehicle": {
+                    "type": "object",
+                    "properties": {
+                      "vin": {
+                        "type": "string"
+                      },
+                      "manufacturer": {
+                        "type": "string"
+                      },
+                      "year": {
+                        "type": "number"
+                      },
+                      "region": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Trip created successfully."
+          },
+          "400": {
+            "description": "Bad request."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/trips/merge": {
+      "post": {
+        "summary": "Merges multiple trips.",
+        "description": "Merges the trips specified by an array of trip IDs. All trips must be editable and valid.",
+        "tags": [
+          "Trips"
+        ],
+        "requestBody": {
+          "description": "Object containing an array of trip IDs.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tripIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Trips merged successfully."
+          },
+          "400": {
+            "description": "Bad request."
+          },
+          "403": {
+            "description": "Forbidden merge."
+          }
+        }
+      }
+    },
+    "/api/report": {
+      "get": {
+        "summary": "Generates a trip report.",
+        "description": "Generates a report based on a date range provided as query parameters.",
+        "tags": [
+          "Trips"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fromDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Start date."
+          },
+          {
+            "in": "query",
+            "name": "toDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "End date."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/vehicles": {
+      "get": {
+        "summary": "Retrieves all vehicles.",
+        "description": "Returns a list of vehicles. For admin users, all vehicles are returned; for managers and dispatchers, a filtered list is provided.",
+        "tags": [
+          "Vehicles"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of vehicles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Vehicle"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access."
+          },
+          "404": {
+            "description": "No vehicles found or no vehicle assigned."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes all vehicles.",
+        "description": "Removes all vehicles from the database. Requires admin API key.",
+        "tags": [
+          "Vehicles"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All vehicles deleted."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/vehicle/{id}": {
+      "get": {
+        "summary": "Retrieves a vehicle by ID.",
+        "description": "Returns the vehicle data corresponding to the given ID.",
+        "tags": [
+          "Vehicles"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The vehicle ID."
+          }
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehicle"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vehicle not found."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      },
+      "patch": {
+        "summary": "Updates a vehicle.",
+        "description": "Updates vehicle data based on the provided ID.",
+        "tags": [
+          "Vehicles"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The vehicle ID."
+          }
+        ],
+        "requestBody": {
+          "description": "The vehicle data to update.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "brand": {
+                    "type": "string"
+                  },
+                  "customName": {
+                    "type": "string"
+                  },
+                  "manufacturer": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "year": {
+                    "type": "number"
+                  },
+                  "licensePlate": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vehicle updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehicle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes a vehicle.",
+        "description": "Removes a vehicle by ID. Requires admin API key.",
+        "tags": [
+          "Vehicles"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The vehicle ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vehicle deleted successfully."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/vehicle": {
+      "post": {
+        "summary": "Creates a new vehicle.",
+        "description": "Adds a new vehicle to the database.",
+        "tags": [
+          "Vehicles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vin": {
+                    "type": "string"
+                  },
+                  "brand": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "year": {
+                    "type": "number"
+                  },
+                  "licensePlate": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "vin"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Vehicle"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Vehicle already exists or validation error."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "Retrieves all users.",
+        "description": "Returns a list of all users. Requires admin API key.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/user/session": {
+      "get": {
+        "summary": "Retrieves the session user.",
+        "description": "Returns the currently authenticated user's session data.",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "Session user information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "webUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "session": {
+                      "type": "object",
+                      "properties": {
+                        "expireTimestamp": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized User-Session."
+          }
+        }
+      }
+    },
+    "/api/user/{id}": {
+      "get": {
+        "summary": "Retrieves a user by ID.",
+        "description": "Returns a specific user based on their ID. Requires admin API key.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The user ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A user object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        }
+      },
+      "patch": {
+        "summary": "Updates a user.",
+        "description": "Updates user data. The authenticated user can update their own data.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The user ID to update."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "vehicleId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes a user.",
+        "description": "Deletes a user by ID. Requires admin API key.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The user ID to delete."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/user": {
+      "post": {
+        "summary": "Creates a new user.",
+        "description": "Creates a new user. Requires admin API key.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "vehicleId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "summary": "Authenticates a user.",
+        "description": "Logs in a user using username and password. On success, a session is created.",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to home on successful login."
+          },
+          "400": {
+            "description": "Missing username or password."
+          },
+          "401": {
+            "description": "Invalid username or password."
+          },
+          "500": {
+            "description": "Server error."
+          }
+        }
+      }
+    },
+    "/api/logout": {
+      "post": {
+        "summary": "Logs out the current user.",
+        "description": "Destroys the user session and clears the session cookie.",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged out successfully."
+          },
+          "500": {
+            "description": "Logout failed."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "vehicleId": {
+            "type": "string"
+          }
+        }
+      },
+      "Vehicle": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "year": {
+            "type": "number"
+          },
+          "licensePlate": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}
