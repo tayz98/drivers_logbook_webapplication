@@ -95,9 +95,11 @@ Hinweise
 
 Diagramme 
 ------
+### Use-Case
+![use-case](./imgs/Use-Case-Web.drawio.png)
 
 ### Komponentendiagramm
-![Komponentendiagramm](./imgs/Komponentendiagramm%20Mobile%20App.drawio%20(1).png)
+![Komponentendiagramm](./imgs/Komponentendiagramm.png)
 
 ### Klassendiagramm
 ![Klassendiagramm](./imgs/web_app_klassen.png)
