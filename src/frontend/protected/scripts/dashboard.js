@@ -320,7 +320,6 @@ function updateIconsVisibility() {
   });
 }
 
-// TODO: add implementation for deleting and merging trips
 function showActionModal(actionType, tripIds) {
   const modalTitle =
     actionType === "delete" ? "Fahrt löschen" : "Fahrten zusammenführen";

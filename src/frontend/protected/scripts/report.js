@@ -138,7 +138,7 @@ function generatePDFFromJSON(data) {
         category: categoryMap[row.tripCategory] || row.tripCategory,
         purpose: row.tripPurpose || "",
         notes: notesCombined,
-        markAsDeleted: row.markAsDeleted, // für das Durchstreichen
+        markAsDeleted: row.markAsDeleted,
       };
     });
 

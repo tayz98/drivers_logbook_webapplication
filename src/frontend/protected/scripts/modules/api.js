@@ -236,7 +236,6 @@ async function mergeTrips(tripIds) {
 
 async function generateReport(fromDate, toDate) {
   try {
-    // Wir erwarten, dass fromDate und toDate Strings im ISO-Format (oder anderen) sind.
     const url = `/api/report?fromDate=${encodeURIComponent(
       fromDate
     )}&toDate=${encodeURIComponent(toDate)}`;

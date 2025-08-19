@@ -5,7 +5,6 @@ const Trip = require("./models/tripSchema");
 const { buildTripQuery } = require("./services/tripService");
 
 let io;
-// TODO: check if filtering for vehicle is working as expected
 module.exports = {
   init: (httpServer) => {
     io = new Server(httpServer);

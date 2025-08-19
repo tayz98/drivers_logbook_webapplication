@@ -242,7 +242,6 @@ router.patch(
   async (req, res) => {
     console.log(req.body);
 
-    // Erstelle ein Update-Objekt
     const updateData = {};
 
     if (req.body.brand !== undefined) {
@@ -259,7 +258,7 @@ router.patch(
     }
     if (req.body.year !== undefined) {
       if (req.body.year === null) {
-        updateData.$unset = { year: "" }; // Entfernt das Feld
+        updateData.$unset = { year: "" };
       } else {
         updateData.year = req.body.year;
       }
@@ -272,7 +271,7 @@ router.patch(
       const updatedVehicle = await Vehicle.findByIdAndUpdate(
         req.params.id,
         updateData,
-        { new: true } // Gibt das aktualisierte Dokument zurück
+        { new: true }
       );
 
       if (!updatedVehicle) {
